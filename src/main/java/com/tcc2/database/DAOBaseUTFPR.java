@@ -11,8 +11,11 @@ public class DAOBaseUTFPR {
 	 * considerando os arquivos ssh.properties e db.properties disponíveis no projeto.
 	 * <p>As conexões para o servidor da UTFPR devem ser obtidas exclusivamente através do objeto factory.</p>
 	 */
-	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
-																						IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
+//	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
+//																						IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
+	
+	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties("src/main/webapp/WEB-INF/properties/db.properties"), 
+																						IOProperties.getProperties("src/main/webapp/WEB-INF/properties/ssh.properties"));
 
 	
 
