@@ -8,11 +8,14 @@ public class PontoDeOnibus {
     private double lat;
     private double lon;
     private int seq;
+    private String sgroup;
     private String direction;
     private String type;
     private int gid;
     private String geom;
 
+    public PontoDeOnibus() {}
+    
     public String getLineCode() {
         return lineCode;
     }
@@ -61,6 +64,14 @@ public class PontoDeOnibus {
         this.seq = seq;
     }
 
+    public String getSgroup() {
+    	return this.sgroup;
+    }
+    
+    public void setSgroup(String sgroup) {
+    	this.sgroup = sgroup;
+    }
+    
     public String getDirection() {
         return direction;
     }

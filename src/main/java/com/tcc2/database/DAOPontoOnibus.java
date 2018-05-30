@@ -6,32 +6,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-
 import com.tcc2.beans.PontoDeOnibus;
-import br.com.starmetal.database.ConnectionFactory;
+
+import br.com.starmetal.database.QueryMaker;
 import br.com.starmetal.exceptions.DatabaseException;
-import br.com.starmetal.io.IOArquivo;
-import br.com.starmetal.io.IOProperties;
 
 public class DAOPontoOnibus {
 
     private static Connection connection;
 
     public DAOPontoOnibus(){
-        connection = new ConnectionFactory().getDefaultConnectionWithSSH();
+        connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
     }
 
-    public List<PontoDeOnibus> consultarPontosDeOnibus(String query){
-
-        if(query == null || query.isEmpty()){
-            return null;
-        }
-
+    public List<PontoDeOnibus> consultarPontosDeOnibus(){
         List<PontoDeOnibus> listaDePontos = new ArrayList<>();
 
         try{
-            PreparedStatement statement = connection.prepareStatement("select * from myurb_linestop where line_code = '020' limit 5;");
+            PreparedStatement statement = connection.prepareStatement("select * from public.pontos_de_onibus limit 5;");
             ResultSet result = statement.executeQuery();
             
             while(result.next()){
@@ -40,46 +32,67 @@ public class DAOPontoOnibus {
             }
 
         } catch(SQLException sqle){
-            throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus na base de Dados: " + sqle.getMessage());
+            throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus na base de Dados.", sqle.getMessage());
         }
 
         return listaDePontos;
     }
 
+    /**
+     * Recebe um objeto ResultSet relacionado a uma consulta a pontos de ônibus e
+     * preenche um JavaBean com os dados resultantes.
+     * 
+     * @param result [Obrigatório] - Objeto contendo uma tupla com dados de um ponto de ônibus.
+     * @return [{@link com.tcc2.beans.PontoDeOnibus}] contendo os dados da tupla do objeto ResultSet.
+     * @throws SQLException
+     */
     private PontoDeOnibus getPontoDeOnibus(ResultSet result) throws SQLException{
-
     	if(result == null) {
-    		
+    		return null;
     	}
     	
         PontoDeOnibus pontoDeOnibus = new PontoDeOnibus();
 
-        pontoDeOnibus.setLineCode   (result.getString("line_code"));
-        pontoDeOnibus.setAddress    (result.getString("address"));
-        pontoDeOnibus.setNum        (result.getInt   ("num"));
+        pontoDeOnibus.setLineCode   (result.getString("codigo_linha"));
+        pontoDeOnibus.setAddress    (result.getString("endereco"));
+        pontoDeOnibus.setNum        (result.getInt   ("numero_ponto"));
         pontoDeOnibus.setLat        (result.getDouble("lat"));
         pontoDeOnibus.setLon        (result.getDouble("lon"));
         pontoDeOnibus.setSeq        (result.getInt   ("seq"));
-        pontoDeOnibus.setDirection  (result.getString("direction"));
-        pontoDeOnibus.setType       (result.getString("type"));
+        pontoDeOnibus.setSgroup		(result.getString("sgroup"));
+        pontoDeOnibus.setDirection  (result.getString("direcao"));
+        pontoDeOnibus.setType       (result.getString("tipo"));
         pontoDeOnibus.setGid        (result.getInt   ("gid"));
         pontoDeOnibus.setGeom       (result.getString("geom"));
 
         return pontoDeOnibus;
     }
     
+    /**
+     * A partir de uma coordenada latitude e longitude determina Pontos de ônibus próximos,
+     * considerando um raio de abrangência arbitrário.
+     * 
+     * @param latitude [Obrigatório] - Uma coordenada latitude.
+     * @param longitude [Obrigatório] - Uma coordenada longitude.
+     * @return [java.util.List] contendo uma lista de pontos de ônibus próximos.
+     */
     public List<PontoDeOnibus> consultarPontosDeOnibusProximos(double latitude, double longitude){
-    	
-    	String query =  "SELECT * " +
-    					"FROM public.myurb_linestop " +
-    					"WHERE ST_Within(geom, ST_buffer(ST_GeomFromText('POINT(? ?)', 4326), 0.01))";
     	
     	List<PontoDeOnibus> listaDePontos = new ArrayList<>();
     	
+//    	String query =  "SELECT * " +
+//    					"FROM public.pontos_de_onibus " +
+//    					"WHERE ST_Within(geom, ST_buffer(ST_GeomFromText('POINT( #1 #2 )', 4326), 0.01))";
+    	
+    	QueryMaker query = new QueryMaker();
+    	query.select("*")
+    		.from("public.pontos_de_onibus")
+    		.where("ST_Within(geom, ST_buffer(ST_GeomFromText('POINT( :longitude :latitude )', 4326), 0.01))")
+    		.setParameter("longitude", longitude)
+    		.setParameter("latitude", latitude);
+    	
     	try {
-        	PreparedStatement statement = connection.prepareStatement(query);
-        	statement.setDouble(1, latitude);
-        	statement.setDouble(2, longitude);
+        	PreparedStatement statement = connection.prepareStatement(query.getQuery());
         	
         	ResultSet result = statement.executeQuery();
         	while(result.next()) {
@@ -88,21 +101,33 @@ public class DAOPontoOnibus {
         	}
         	
     	} catch(SQLException sqle) {
-    		throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus próximos");
+    		throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus próximos", sqle.getMessage());
     	}
     	
-    	return null;
+    	return listaDePontos;
     }
     
     public static void main(String[] args) {
-
-//        String path = IOProperties.DEFAULT_PROPERTIES_FOLDER_PATH + IOArquivo.SEPARADOR_DE_DIRETORIO + "db.properties";
-
-//        Properties properties = IOProperties.getProperties(path);
-
-        DAOPontoOnibus dao = new DAOPontoOnibus();
-
-        List<PontoDeOnibus> lista = dao.consultarPontosDeOnibus("dummy");
+    	DAOPontoOnibus.testePontosProximos();
+    }
+    
+    private static void testePontosProximos() {
+    	double latitude = -25.43941;
+    	double longitude = -49.26862;
+    	List<PontoDeOnibus> lista = new DAOPontoOnibus().consultarPontosDeOnibusProximos(latitude, longitude);
+    	
+        for(PontoDeOnibus ponto : lista){
+            System.out.println(ponto.getLineCode() + ";" +
+                                ponto.getLat() + ";" +
+                                ponto.getLon() + ";" +
+                                ponto.getNum());
+        }
+        
+        DAOBaseUTFPR.factory.closeConnectionWithSSH();    	
+    }
+    
+    private static void testeConsultarPontos() {
+        List<PontoDeOnibus> lista = new DAOPontoOnibus().consultarPontosDeOnibus();
 
         for(PontoDeOnibus ponto : lista){
             System.out.println(ponto.getLineCode() + ";" +
@@ -111,6 +136,6 @@ public class DAOPontoOnibus {
                                 ponto.getNum());
         }
         
-        new ConnectionFactory().closeDefaultConnectionWithSSH();
+        DAOBaseUTFPR.factory.closeConnectionWithSSH();
     }
 }

@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import com.jcraft.jsch.JSchException;
+import com.tcc2.database.DAOBaseUTFPR;
+import com.tcc2.geral.Constantes;
 
 import br.com.starmetal.database.ConnectionFactory;
 import br.com.starmetal.io.IOArquivo;
@@ -35,8 +36,8 @@ public class TestesUnitarios {
         ssh.setRemoteHost("200.134.10.21");
         ssh.setLocalHost("localhost");
         ssh.setSSHPort(22);
-        ssh.setLocalHostPort(5432);
-        ssh.setRemoteHostPort(5434);
+        ssh.setLocalHostPort(5434);
+        ssh.setRemoteHostPort(5432);
         
         try {
         	ssh.connect();
@@ -67,9 +68,30 @@ public class TestesUnitarios {
         }
 	}
 	
+	private static void TesteSSH2() {
+		Connection connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
+		System.out.println(Constantes.SSH_CONFIG_FILE_PATH);
+        try {
+            System.out.println("Criando query...");
+            Statement st = connection.createStatement();
+            String query = "select * from public.pontos_de_onibus limit 5;";
+            
+            ResultSet select = st.executeQuery(query);
+            while(select.next()){
+                String cod = select.getString("gid");
+                System.out.println("COD: " + cod);
+            }
+            System.out.println("Conexão BD encerrada...");
+        } catch(SQLException sql ) {
+        	sql.printStackTrace();
+        }
+		
+	}
+	
 	public static void main(String[] args) {
-		TestesUnitarios.TesteIO();
+//		TestesUnitarios.TesteIO();
 //		TestesUnitarios.TesteSSH();
+		TestesUnitarios.TesteSSH2();
 	}
 
 }
