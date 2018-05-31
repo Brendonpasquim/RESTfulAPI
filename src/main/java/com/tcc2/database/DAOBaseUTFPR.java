@@ -14,8 +14,8 @@ public class DAOBaseUTFPR {
 //	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
 //																						IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
 	
-	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties("/opt/app-root/src/src/main/webapp/WEB-INF/properties/db.properties"), 
-																						IOProperties.getProperties("/opt/app-root/src/src/main/webapp/WEB-INF/properties/ssh.properties"));
+	public static final ConnectionFactoryWithSSH factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+																						IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 
 	
 
