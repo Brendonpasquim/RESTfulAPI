@@ -1,5 +1,8 @@
 package com.tcc2.database;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.tcc2.geral.Constantes;
 
 import br.com.starmetal.database.ConnectionFactoryWithSSH;
@@ -32,6 +35,7 @@ public class DAOBaseUTFPR {
 	}
 	
 	private static ConnectionFactoryWithSSH getProductionModeConnection() {
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, String.format("Variável de Ambiente PROJECT_PATH '%s'", System.getenv("PROJECT_PATH")));
 		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("PROJECT_PATH") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
 				   							IOProperties.getProperties(System.getenv("PROJECT_PATH") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 	}
