@@ -29,8 +29,9 @@ public class DAOBaseUTFPR {
 	
 	private static ConnectionFactoryWithSSH getProductionModeConnection() {
 		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
-		return new ConnectionFactoryWithSSH(IOProperties.getProperties("/opt/app-root/src" + "/src/main/webapp/WEB-INF/properties/db.properties"), 
-				   							IOProperties.getProperties("/opt/app-root/src" + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, String.format("########======== Variável HOME = [%s] =======########", System.getenv("HOME")));
+		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+				   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 	}
 	
 	private static ConnectionFactoryWithSSH getDevelopmentModeConnection() {
