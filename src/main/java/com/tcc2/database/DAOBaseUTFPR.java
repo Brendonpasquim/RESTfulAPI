@@ -32,8 +32,8 @@ public class DAOBaseUTFPR {
 	}
 	
 	private static ConnectionFactoryWithSSH getProductionModeConnection() {
-		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
-				   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
+		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("PROJECT_PATH") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+				   							IOProperties.getProperties(System.getenv("PROJECT_PATH") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 	}
 	
 	private static ConnectionFactoryWithSSH getDevelopmentModeConnection() {
