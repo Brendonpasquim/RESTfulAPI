@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.tcc2.geral.Constantes;
 
 import br.com.starmetal.database.ConnectionFactoryWithSSH;
+import br.com.starmetal.exceptions.BusinessException;
 import br.com.starmetal.io.IOProperties;
 import br.com.starmetal.validacoes.Validacao;
 
@@ -26,21 +27,35 @@ public class DAOBaseUTFPR {
 	public static ConnectionFactoryWithSSH factory = isProductionMode() ? getProductionModeConnection() : getDevelopmentModeConnection();
 	
 	private static boolean isProductionMode() {
-		String mode = IOProperties.getProperties(Constantes.DEFAULT_CONFIG_FILE_PATH).getProperty("config.production_mode");
-		if(Validacao.ehStringVazia(mode) || mode.equalsIgnoreCase("false")) {
-			return false;
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, "Verificando Modo de Operação...");
+		
+		String propertiesLocal = IOProperties.getProperties(Constantes.DEFAULT_CONFIG_FILE_PATH).getProperty("config.production_mode");
+		String propertiesNuvem = null;
+		
+		if(!Validacao.ehStringVazia(System.getenv("HOME"))) {
+			propertiesNuvem = IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/configs.properties").getProperty("config.production_mode");
 		}
 		
-		return true;
+		if(Validacao.ehStringVazia(propertiesLocal) && Validacao.ehStringVazia(propertiesNuvem)) {
+			throw new BusinessException("Não foi possível localicar o arquivo de propriedades 'configs'");
+		}
+		
+		if(!Validacao.ehStringVazia(propertiesNuvem) && propertiesNuvem.equalsIgnoreCase("true")) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private static ConnectionFactoryWithSSH getProductionModeConnection() {
-		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, String.format("Variável de Ambiente PROJECT_PATH '%s'", System.getenv("PROJECT_PATH")));
-		return new ConnectionFactoryWithSSH(IOProperties.getProperties("/opt/app-root/src/src/main/webapp/WEB-INF/properties/db.properties"), 
-				   							IOProperties.getProperties("/opt/app-root/src/src/main/webapp/WEB-INF/properties/ssh.properties"));
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, String.format("Variável de Ambiente PROJECT_PATH '%s'", System.getenv("HOME")));
+		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+				   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 	}
 	
 	private static ConnectionFactoryWithSSH getDevelopmentModeConnection() {
+		Logger.getLogger(Validacao.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
 		return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
 				   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
 	}
