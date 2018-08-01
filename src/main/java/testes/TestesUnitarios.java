@@ -10,6 +10,7 @@ import com.tcc2.database.DAOBaseUTFPR;
 import com.tcc2.geral.Constantes;
 
 import br.com.starmetal.database.ConnectionFactory;
+import br.com.starmetal.database.QueryMaker;
 import br.com.starmetal.io.IOArquivo;
 import br.com.starmetal.io.IOProperties;
 import br.com.starmetal.network.SSHConnector;
@@ -88,10 +89,20 @@ public class TestesUnitarios {
 		
 	}
 	
+	private static void TesteQueryMaker() {
+        QueryMaker query = new QueryMaker();
+        query.select("P.numero_ponto, P.endereco, P.tipo, P.codigo_linha, L.nome_linha, P.seq, L.apenas_cartao, ST_AsGeoJSON(P.geom, 15, 0) as geojson")
+        	 .from("pontos_de_onibus P, linhas_de_onibus L")
+        	 .where("P.codigo_linha = L.codigo_linha ORDER BY P.numero_ponto");
+        
+        query.printQuery();
+	}
+	
 	public static void main(String[] args) {
 //		TestesUnitarios.TesteIO();
 //		TestesUnitarios.TesteSSH();
-		TestesUnitarios.TesteSSH2();
+//		TestesUnitarios.TesteSSH2();
+		TestesUnitarios.TesteQueryMaker();
 	}
 
 }

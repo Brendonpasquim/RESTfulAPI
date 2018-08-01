@@ -1,11 +1,18 @@
 package com.tcc2.database;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.JSONArray;
 
 import com.tcc2.geral.Constantes;
 
 import br.com.starmetal.database.ConnectionFactoryWithSSH;
+import br.com.starmetal.database.QueryMaker;
+import br.com.starmetal.exceptions.DatabaseException;
 import br.com.starmetal.io.IOProperties;
 import br.com.starmetal.validacoes.Validacao;
 
@@ -40,6 +47,22 @@ public class DAOBaseUTFPR {
 				   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
 	}
 
-	
+	public static JSONArray QueryExecutor(QueryMaker query) {
+		if(query == null) {
+			return new JSONArray();
+		}
+		
+		JSONArray jsonArray;
+		try {
+			PreparedStatement statement = factory.getConnectionWithSSH().prepareStatement(query.getQuery());
+            ResultSet result = statement.executeQuery();
+			jsonArray = Parser.toJSON(result);
+			
+		} catch(SQLException sqle) {
+			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
+		}
+		
+		return jsonArray;
+	}
 
 }
