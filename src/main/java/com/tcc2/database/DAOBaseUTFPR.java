@@ -42,6 +42,10 @@ public class DAOBaseUTFPR {
 	}
 	
 	private static ConnectionFactoryWithSSH getDevelopmentModeConnection() {
+		if(PRODUCTION_MODE) {
+			return null;
+		}
+		
 		Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
 		return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
 				   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
