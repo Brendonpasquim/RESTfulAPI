@@ -32,23 +32,20 @@ public class DAOBaseUTFPR {
 	 * considerando os arquivos ssh.properties e db.properties disponíveis no projeto.
 	 * <p>As conexões para o servidor da UTFPR devem ser obtidas exclusivamente através do objeto factory.</p>
 	 */
-	public static ConnectionFactoryWithSSH factory = PRODUCTION_MODE ? getProductionModeConnection() : getDevelopmentModeConnection();
+	public static ConnectionFactoryWithSSH factory = getConnectionMode();
 	
-	private static ConnectionFactoryWithSSH getProductionModeConnection() {
-		Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
-		Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, String.format("########======== Variável HOME = [%s] =======########", System.getenv("HOME")));
-		return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
-				   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
-	}
-	
-	private static ConnectionFactoryWithSSH getDevelopmentModeConnection() {
-		if(PRODUCTION_MODE) {
-			return null;
-		}
+	private static ConnectionFactoryWithSSH getConnectionMode() {
 		
-		Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
-		return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
-				   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));
+		if(PRODUCTION_MODE) {
+			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
+			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, String.format("########======== Variável HOME = [%s] =======########", System.getenv("HOME")));
+			return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+					   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
+		} else {
+			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
+			return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
+					   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));	
+		}
 	}
 
 	public static JSONArray QueryExecutor(QueryMaker query) {
