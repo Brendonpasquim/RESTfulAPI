@@ -17,7 +17,7 @@ public class DAOBaseUTFPR {
 //	public static final ConnectionFactoryWithSSH FACTORY = new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
 //	IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 
-	private static final boolean PRODUCTION_MODE = false;
+	private static final boolean PRODUCTION_MODE = true;
 	
 	/**
 	 * Fornece uma Factory de conexões para base de dados via SSH. O SSH e o banco de dados são configurados
