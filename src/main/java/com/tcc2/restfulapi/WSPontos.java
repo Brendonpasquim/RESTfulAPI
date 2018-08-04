@@ -11,10 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.tcc2.beans.PontoDeOnibus;
-import com.tcc2.database.DAOBaseUTFPR;
 import com.tcc2.database.DAOPontos;
 
 @Path("pontos")

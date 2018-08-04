@@ -28,16 +28,14 @@ public class DAOBaseUTFPR {
 	
 	private static ConnectionFactoryWithSSH getConnectionMode() {
 		
-//		if(PRODUCTION_MODE) {
+		if(PRODUCTION_MODE) {
 			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
 			return new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
 					   							IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
-//		} 
-		
-//		else {
-//			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
-//			return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
-//					   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));	
-//		}
+		} else {
+			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
+			return new ConnectionFactoryWithSSH(IOProperties.getProperties(Constantes.DB_CONFIG_FILE_PATH), 
+					   							IOProperties.getProperties(Constantes.SSH_CONFIG_FILE_PATH));	
+		}
 	}
 }
