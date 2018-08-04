@@ -8,6 +8,7 @@ public class Constantes {
 	 * Pasta em que ocorre a implantação (deploy) do projeto, ao utilizar-se Tomcat.
 	 */
 	public static final String DEPLOYMENT_FOLDER_PATH = System.getProperty("catalina.base");
+	//Para Wildfly jboss.server.config.dir
 	
 	/**
 	 * Caminho para o arquivo de configuração padrão do projeto, quando implantado com Tomcat.

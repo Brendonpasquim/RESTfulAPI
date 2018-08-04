@@ -8,21 +8,89 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.tcc2.beans.PontoDeOnibus;
 
 import br.com.starmetal.database.QueryMaker;
 import br.com.starmetal.exceptions.DatabaseException;
+import br.com.starmetal.results.ResultType;
 
 public class DAOPontos {
 
-    private static Connection connection;
+    private Connection connection;
 
     public DAOPontos(){
         connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
     }
 
+    public ResultType finalizeConnection() {
+    	if(this.connection == null) {
+    		return ResultType.ERROR;
+    	}
+    	
+    	try {
+    		this.connection.close();
+    	} catch(SQLException sqle) {
+    		throw new DatabaseException("Falha ao encerrar conexão com banco de dados.", sqle.getMessage());
+    	}
+    	
+    	return ResultType.SUCESS;
+    }
+    
+    /**
+     * Executa a query e encerra a conexão.
+     * @param query
+     * @return
+     */
+	private JSONArray QueryExecutor(QueryMaker query) {
+		JSONArray jsonArray = QueryExecutor(query, this.connection);
+		finalizeConnection();		
+		return jsonArray;
+	}
+	
+	/**
+	 * Executa a query e mantém a conexão disponível para uso.
+	 * @param query
+	 * @param connection
+	 * @return
+	 */
+	private JSONArray QueryExecutor(QueryMaker query, Connection connection) {
+		if(query == null) {
+			return new JSONArray();
+		}
+		
+		if(connection == null) {
+			if(this.connection != null) {
+				connection = this.connection;
+			}else {
+				this.connection = connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
+			}
+		}
+		
+		PreparedStatement statement = null;
+		ResultSet result = null;
+		JSONArray jsonArray;
+		try {
+			statement = connection.prepareStatement(query.getQuery());
+            result = statement.executeQuery();
+			jsonArray = Parser.toJSON(result);
+			
+		} catch(SQLException sqle) {
+			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
+		} finally {
+			try{
+				
+				if(statement 	!= null) statement.close();
+				if(result 		!= null) result.close();
+				
+			} catch(SQLException sqle) {
+				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.", sqle.getMessage());
+			}
+		}
+		
+		return jsonArray;
+	}
+    
     /**
      * A partir de uma coordenada latitude e longitude determina Pontos de ônibus próximos,
      * considerando um raio de abrangência arbitrário.
@@ -50,6 +118,9 @@ public class DAOPontos {
         		PontoDeOnibus pontoDeOnibus = getPontoDeOnibus(result);
         		listaDePontos.add(pontoDeOnibus);
         	}
+        	
+        	result.close();
+        	statement.close();
         	
     	} catch(SQLException sqle) {
     		throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus próximos", sqle.getMessage());
@@ -100,7 +171,7 @@ public class DAOPontos {
         	 .from("pontos_de_onibus P, linhas_de_onibus L")
         	 .where("P.codigo_linha = L.codigo_linha ORDER BY P.numero_ponto");
         
-        return DAOBaseUTFPR.QueryExecutor(query);
+        return QueryExecutor(query);
     }
 
     /**
@@ -113,11 +184,12 @@ public class DAOPontos {
     		 .from("pontos_de_onibus")
     		 .orderBy("tipo");
     	
-    	return DAOBaseUTFPR.QueryExecutor(query);
+    	return QueryExecutor(query);
     }
     
-    /*
+    /**
      * 
+     * @return
      */
     public JSONArray consultarBairros() {
     	QueryMaker query = new QueryMaker();
@@ -125,11 +197,12 @@ public class DAOPontos {
     		 .from("divisa_de_bairros")
     		 .orderBy("nome");
     	
-    	return DAOBaseUTFPR.QueryExecutor(query);
+    	return QueryExecutor(query);
     }
     
-    /*
+    /**
      * 
+     * @return
      */
     public JSONArray consultarLinhas() {
     	QueryMaker query = new QueryMaker();
@@ -137,11 +210,12 @@ public class DAOPontos {
     		 .from("linhas_de_onibus ")
     		 .orderBy("codigo_linha");
     	
-    	return DAOBaseUTFPR.QueryExecutor(query);
+    	return QueryExecutor(query);
     }
     
-    /*
+    /**
      * 
+     * @return
      */
     public JSONArray consultarCategoriasDeLinhas() {
     	QueryMaker query = new QueryMaker();
@@ -149,9 +223,13 @@ public class DAOPontos {
     		 .from("linhas_de_onibus  ")
     		 .orderBy("categoria");
     	
-    	return DAOBaseUTFPR.QueryExecutor(query);
+    	return QueryExecutor(query);
     }
     
+    /**
+     * 
+     * @return
+     */
     public JSONArray consultarItinerarios() {
     	
     	String clausuraWith = "WITH tabela_aux AS (SELECT codigo_linha, MAX(shape_len) AS tamanho FROM itinerarios_de_onibus GROUP BY codigo_linha)"; 
@@ -175,8 +253,9 @@ public class DAOPontos {
     	}
     }
     
-    /*
+    /**
      * 
+     * @return
      */
     public JSONArray consultarHorarios() {
     	QueryMaker query = new QueryMaker();
@@ -184,6 +263,6 @@ public class DAOPontos {
     		 .from("horarios_de_onibus")
     		 .orderBy("codigo_linha", "ponto", "tipo_dia", "horario_saida");
     	
-    	return DAOBaseUTFPR.QueryExecutor(query);
+    	return QueryExecutor(query);
     }
 }

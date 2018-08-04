@@ -7,11 +7,14 @@ import java.sql.SQLException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import br.com.starmetal.database.QueryMaker;
-import br.com.starmetal.exceptions.DatabaseException;
-
 public class Parser {
 	
+	/**
+	 * 
+	 * @param result
+	 * @return
+	 * @throws SQLException
+	 */
 	public static JSONArray toJSON(ResultSet result) throws SQLException {
 		if(result == null) {
 			return null;

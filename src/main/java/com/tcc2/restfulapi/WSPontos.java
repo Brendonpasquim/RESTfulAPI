@@ -14,10 +14,17 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.tcc2.beans.PontoDeOnibus;
+import com.tcc2.database.DAOBaseUTFPR;
 import com.tcc2.database.DAOPontos;
 
 @Path("pontos")
 public class WSPontos {
+	
+	private DAOPontos dao;
+	
+	public WSPontos() {
+		dao = new DAOPontos();
+	}
 	
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -25,33 +32,13 @@ public class WSPontos {
         return "Got it 222!";
     }
 
-    @GET
-    @Path("teste")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response testeJson() {
-        
-    	JSONArray array = new JSONArray();
-    	array.put(true);
-    	array.put(1234);
-    	array.put("testetestetes");
-    	
-    	JSONObject json = new JSONObject();
-    	json.put("id", 1);
-    	json.put("nome", "brendon");
-    	json.put("lista", array);
-    	
-    	return Response.ok(json.toString()).build();
-    }
-    
 	@GET
 	@Path("pontosproximos")
 	@Produces(MediaType.APPLICATION_JSON)	
 	public Response consultarPontosProximos(@NotNull @QueryParam("latitude") double latitude, 
 											@NotNull @QueryParam("longitude") double longitude) {
 				
-        DAOPontos dao = new DAOPontos();
         List<PontoDeOnibus> lista = dao.consultarPontosDeOnibusProximos(latitude, longitude);
-        
 		return Response.ok(lista).build();
 	}
 	
@@ -60,9 +47,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarPontos() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray pontos = dao.consultarPontosDeOnibus();
-		
 		return pontos.toString();
 	}
 	
@@ -71,9 +56,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarTiposDePontos() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray tipos = dao.consultarTiposDePonto();
-		
 		return tipos.toString();
 	}
 	
@@ -82,9 +65,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarBairros() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray bairros = dao.consultarBairros();
-		
 		return bairros.toString();
 	}
 	
@@ -93,9 +74,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarLinhas() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray linhas = dao.consultarLinhas();
-		
 		return linhas.toString();
 	}
 	
@@ -105,9 +84,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarCategoriaDeLinha() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray categorias = dao.consultarCategoriasDeLinhas();
-		
 		return categorias.toString();
 	}
 	
@@ -117,9 +94,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarItinerarios() {
 		
-		DAOPontos dao = new DAOPontos();
 		JSONArray itinerarios = dao.consultarItinerarios();
-		
 		return itinerarios.toString();
 	}
 	
@@ -127,9 +102,8 @@ public class WSPontos {
 	@Path("horarios")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarHorarios() {
-		DAOPontos dao = new DAOPontos();
-		JSONArray horarios = dao.consultarHorarios();
 		
+		JSONArray horarios = dao.consultarHorarios();
 		return horarios.toString();
 	}
 
