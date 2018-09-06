@@ -1,4 +1,4 @@
-package testes;
+package com.tcc2.testes;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
