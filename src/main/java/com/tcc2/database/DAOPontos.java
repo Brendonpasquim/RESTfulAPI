@@ -9,62 +9,28 @@ import java.util.List;
 
 import org.json.JSONArray;
 
-import com.tcc2.beans.PontoDeOnibus;
+import com.tcc2.beans.PontosProximos;
 
-import br.com.starmetal.database.QueryMaker;
+import br.com.starmetal.database.postgresql.QueryMaker;
 import br.com.starmetal.exceptions.DatabaseException;
-import br.com.starmetal.results.ResultType;
 
 public class DAOPontos {
 
     private Connection connection;
 
-    public DAOPontos(){
-        connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
+    public DAOPontos(Connection connection){
+        this.connection = connection;
     }
 
-    public ResultType finalizeConnection() {
-    	if(this.connection == null) {
-    		return ResultType.ERROR;
-    	}
-    	
-    	try {
-    		this.connection.close();
-    	} catch(SQLException sqle) {
-    		throw new DatabaseException("Falha ao encerrar conexão com banco de dados.", sqle.getMessage());
-    	}
-    	
-    	return ResultType.SUCESS;
-    }
-    
-    /**
-     * Executa a query e encerra a conexão.
-     * @param query
-     * @return
-     */
-	private JSONArray QueryExecutor(QueryMaker query) {
-		JSONArray jsonArray = QueryExecutor(query, this.connection);
-		finalizeConnection();		
-		return jsonArray;
-	}
-	
 	/**
 	 * Executa a query e mantém a conexão disponível para uso.
 	 * @param query
 	 * @param connection
 	 * @return
 	 */
-	private JSONArray QueryExecutor(QueryMaker query, Connection connection) {
+	private JSONArray QueryExecutor(QueryMaker query) {
 		if(query == null) {
 			return new JSONArray();
-		}
-		
-		if(connection == null) {
-			if(this.connection != null) {
-				connection = this.connection;
-			}else {
-				this.connection = connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
-			}
 		}
 		
 		PreparedStatement statement = null;
@@ -99,23 +65,22 @@ public class DAOPontos {
      * @param longitude [Obrigatório] - Uma coordenada longitude.
      * @return [java.util.List] contendo uma lista de pontos de ônibus próximos.
      */
-    public List<PontoDeOnibus> consultarPontosDeOnibusProximos(double latitude, double longitude){
-    	
-    	List<PontoDeOnibus> listaDePontos = new ArrayList<>();
-    	
+    public List<PontosProximos> consultarPontosDeOnibusProximos(double latitude, double longitude){
     	QueryMaker query = new QueryMaker();
-    	query.select("*")
-    		.from("public.pontos_de_onibus")
+    	query.select("DISTINCT P.numero_ponto", "P.endereco", "P.tipo", "P.codigo_linha", "L.nome_linha", "L.cor", "L.apenas_cartao", "ST_AsGeoJSON(P.geom, 15, 0) as geojson")
+    		.from("pontos_de_onibus P, linhas_de_onibus L")
     		.where("ST_Within(geom, ST_buffer(ST_GeomFromText('POINT( :longitude :latitude )', 4326), 0.0025))")
+    		.where("P.codigo_linha = L.codigo_linha")
     		.setParameter("longitude", longitude)
     		.setParameter("latitude", latitude);
     	
+    	List<PontosProximos> listaDePontos = new ArrayList<>();
     	try {
         	PreparedStatement statement = connection.prepareStatement(query.getQuery());
         	
         	ResultSet result = statement.executeQuery();
         	while(result.next()) {
-        		PontoDeOnibus pontoDeOnibus = getPontoDeOnibus(result);
+        		PontosProximos pontoDeOnibus = Parser.toPontoProximo(result);
         		listaDePontos.add(pontoDeOnibus);
         	}
         	
@@ -130,46 +95,16 @@ public class DAOPontos {
     }
     
     /**
-     * Recebe um objeto ResultSet relacionado a uma consulta a pontos de ônibus e
-     * preenche um JavaBean com os dados resultantes.
-     * 
-     * @param result [Obrigatório] - Objeto contendo uma tupla com dados de um ponto de ônibus.
-     * @return [{@link com.tcc2.beans.PontoDeOnibus}] contendo os dados da tupla do objeto ResultSet.
-     * @throws SQLException
-     */
-    private PontoDeOnibus getPontoDeOnibus(ResultSet result) throws SQLException{
-    	if(result == null) {
-    		return null;
-    	}
-    	
-        PontoDeOnibus pontoDeOnibus = new PontoDeOnibus();
-
-        pontoDeOnibus.setLineCode   (result.getString("codigo_linha"));
-        pontoDeOnibus.setAddress    (result.getString("endereco"));
-        pontoDeOnibus.setNum        (result.getInt   ("numero_ponto"));
-        pontoDeOnibus.setLat        (result.getDouble("lat"));
-        pontoDeOnibus.setLon        (result.getDouble("lon"));
-        pontoDeOnibus.setSeq        (result.getInt   ("seq"));
-        pontoDeOnibus.setSgroup		(result.getString("sgroup"));
-        pontoDeOnibus.setDirection  (result.getString("direcao"));
-        pontoDeOnibus.setType       (result.getString("tipo"));
-        pontoDeOnibus.setGid        (result.getInt   ("gid"));
-        pontoDeOnibus.setGeom       (result.getString("geom"));
-
-        return pontoDeOnibus;
-    }
-    
-    /**
      * Consulta todos os pontos de ônibus disponíveis.
      * 
      * @return [org.json.JSONArray] contendo uma lista de pontos de ônibus
      */
     public JSONArray consultarPontosDeOnibus() {
-
     	QueryMaker query = new QueryMaker();
         query.select("P.numero_ponto", "P.endereco", "P.tipo", "P.codigo_linha", "L.nome_linha", "P.seq", "L.apenas_cartao", "ST_AsGeoJSON(P.geom, 15, 0) as geojson")
         	 .from("pontos_de_onibus P, linhas_de_onibus L")
-        	 .where("P.codigo_linha = L.codigo_linha ORDER BY P.numero_ponto");
+        	 .where("P.codigo_linha = L.codigo_linha")
+        	 .orderBy("P.numero_ponto");
         
         return QueryExecutor(query);
     }
@@ -232,25 +167,31 @@ public class DAOPontos {
      */
     public JSONArray consultarItinerarios() {
     	
-    	String clausuraWith = "WITH tabela_aux AS (SELECT codigo_linha, MAX(shape_len) AS tamanho FROM itinerarios_de_onibus GROUP BY codigo_linha)"; 
+//    	String clausuraWith = "WITH tabela_aux AS (SELECT codigo_linha, MAX(shape_len) AS tamanho FROM itinerarios_de_onibus GROUP BY codigo_linha)"; 
+//    	
+//    	QueryMaker query = new QueryMaker();
+//    	String consultaPrincipal = 
+//    			query.select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
+//		    		 .from("itinerarios_de_onibus ")
+//		    		 .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
+//		    		 .orderBy("nome_linha;")
+//		    		 .getQuery();
+//    	
+//    	String queryCompleta = clausuraWith + " " + consultaPrincipal;
+    	
+    	QueryMaker clausuraWith = new QueryMaker(); 
+    	clausuraWith.select("codigo_linha", "MAX(shape_len) AS tamanho")
+    				.from("itinerarios_de_onibus")
+    				.groupBy("codigo_linha");
     	
     	QueryMaker query = new QueryMaker();
-    	String consultaPrincipal = 
-    			query.select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
-		    		 .from("itinerarios_de_onibus ")
-		    		 .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
-		    		 .orderBy("nome_linha;")
-		    		 .getQuery();
+    	query.with(clausuraWith, "tabela_aux")
+    		 .select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
+			 .from("itinerarios_de_onibus ")
+		     .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
+		     .orderBy("nome_linha");
     	
-    	String queryCompleta = clausuraWith + " " + consultaPrincipal;
-    	
-    	try {
-    		PreparedStatement statement = connection.prepareStatement(queryCompleta);
-    		ResultSet result = statement.executeQuery();
-    		return Parser.toJSON(result);
-    	} catch(SQLException sqle) {
-    		throw new DatabaseException("Falha ao executar consulta por Itinerários de Ônibus", sqle.getMessage());
-    	}
+    	return QueryExecutor(query);
     }
     
     /**
@@ -262,6 +203,34 @@ public class DAOPontos {
     	query.select("codigo_linha", "horario_saida", "ponto", "tipo_dia", "numero_ponto", "adaptado")
     		 .from("horarios_de_onibus")
     		 .orderBy("codigo_linha", "ponto", "tipo_dia", "horario_saida");
+    	
+    	return QueryExecutor(query);
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public JSONArray consultarProblemasOnibusCrowdsourcing() {
+    	QueryMaker query = new QueryMaker();
+    	query.select("C.dia", "C.horario", "C.tipo", "C.numero_ponto", "P.tipo", "P.endereco", "ST_AsGeoJSON(P.geom, 15, 0) as geojson")
+    		 .from("crowdsourcing_pontos C, divisa_de_bairros B, pontos_de_onibus P")
+    		 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
+    		 .where("C.numero_ponto = P.numero_ponto");
+    	
+    	return QueryExecutor(query);
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public JSONArray consultarProblemasLinhasCrowdsourcing() {
+    	QueryMaker query = new QueryMaker();
+    	query.select("C.dia, C.horario, B.nome, C.tipo, C.codigo_linha, L.nome_linha, L.cor, L.categoria, L.apenas_cartao, ST_AsGeoJSON(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), 15, 0) as geojson")
+    		 .from("crowdsourcing_linhas C, linhas_de_onibus L, divisa_de_bairros B")
+    		 .where("ST_Within(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
+    		 .where("L.codigo_linha = C.codigo_linha");
     	
     	return QueryExecutor(query);
     }

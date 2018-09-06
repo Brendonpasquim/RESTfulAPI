@@ -6,11 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import com.tcc2.database.DAOBaseUTFPR;
-import com.tcc2.geral.Constantes;
-
 import br.com.starmetal.database.ConnectionFactory;
-import br.com.starmetal.database.QueryMaker;
+import br.com.starmetal.database.postgresql.QueryMaker;
 import br.com.starmetal.io.IOArquivo;
 import br.com.starmetal.io.IOProperties;
 import br.com.starmetal.network.SSHConnector;
@@ -69,25 +66,25 @@ public class TestesUnitarios {
         }
 	}
 	
-	private static void TesteSSH2() {
-		Connection connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
-		System.out.println(Constantes.SSH_CONFIG_FILE_PATH);
-        try {
-            System.out.println("Criando query...");
-            Statement st = connection.createStatement();
-            String query = "select * from public.pontos_de_onibus limit 5;";
-            
-            ResultSet select = st.executeQuery(query);
-            while(select.next()){
-                String cod = select.getString("gid");
-                System.out.println("COD: " + cod);
-            }
-            System.out.println("Conexão BD encerrada...");
-        } catch(SQLException sql ) {
-        	sql.printStackTrace();
-        }
-		
-	}
+//	private static void TesteSSH2() {
+//		Connection connection = DAOBaseUTFPR.factory.getConnectionWithSSH();
+//		System.out.println(Constantes.SSH_CONFIG_FILE_PATH);
+//        try {
+//            System.out.println("Criando query...");
+//            Statement st = connection.createStatement();
+//            String query = "select * from public.pontos_de_onibus limit 5;";
+//            
+//            ResultSet select = st.executeQuery(query);
+//            while(select.next()){
+//                String cod = select.getString("gid");
+//                System.out.println("COD: " + cod);
+//            }
+//            System.out.println("Conexão BD encerrada...");
+//        } catch(SQLException sql ) {
+//        	sql.printStackTrace();
+//        }
+//		
+//	}
 	
 	private static void TesteQueryMaker() {
         QueryMaker query = new QueryMaker();
@@ -99,8 +96,8 @@ public class TestesUnitarios {
 	}
 	
 	public static void main(String[] args) {
-//		TestesUnitarios.TesteIO();
-//		TestesUnitarios.TesteSSH();
+		TestesUnitarios.TesteIO();
+		TestesUnitarios.TesteSSH();
 //		TestesUnitarios.TesteSSH2();
 		TestesUnitarios.TesteQueryMaker();
 	}
