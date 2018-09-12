@@ -114,7 +114,7 @@
 		    <version>0.0.1</version>
 		    <scope>system</scope>
 		    <systemPath>
-		        {env.HOME}/src/main/webapp/WEB-INF/lib/starmetal.jar
+		        /opt/app-root/src/src/main/webapp/WEB-INF/lib/starmetal.jar
 		    </systemPath>
 		</dependency>
 	</dependencies>
