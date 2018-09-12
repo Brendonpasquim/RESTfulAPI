@@ -94,6 +94,15 @@ public class DAOPontos {
     	return listaDePontos;
     }
     
+    public JSONArray consultarPontosDeOnibusProximosSimplificado(double latitude, double longitude) {
+    	QueryMaker query = new QueryMaker();
+    	query.select("numero_ponto")
+    		 .from("pontos_de_onibus")
+    		 .where("ST_Within(geom, ST_buffer(ST_GeomFromText('POINT(lon_origem lat_origem)', 4326), 0.0025))");
+    	
+    	return QueryExecutor(query);
+    }
+    
     /**
      * Consulta todos os pontos de ônibus disponíveis.
      * 
@@ -166,19 +175,6 @@ public class DAOPontos {
      * @return
      */
     public JSONArray consultarItinerarios() {
-    	
-//    	String clausuraWith = "WITH tabela_aux AS (SELECT codigo_linha, MAX(shape_len) AS tamanho FROM itinerarios_de_onibus GROUP BY codigo_linha)"; 
-//    	
-//    	QueryMaker query = new QueryMaker();
-//    	String consultaPrincipal = 
-//    			query.select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
-//		    		 .from("itinerarios_de_onibus ")
-//		    		 .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
-//		    		 .orderBy("nome_linha;")
-//		    		 .getQuery();
-//    	
-//    	String queryCompleta = clausuraWith + " " + consultaPrincipal;
-    	
     	QueryMaker clausuraWith = new QueryMaker(); 
     	clausuraWith.select("codigo_linha", "MAX(shape_len) AS tamanho")
     				.from("itinerarios_de_onibus")

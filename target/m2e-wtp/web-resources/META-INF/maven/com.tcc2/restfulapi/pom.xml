@@ -107,6 +107,16 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+		    <groupId>starmetal</groupId>
+		    <artifactId>com.tcc2.starmetal</artifactId>
+		    <version>0.0.1</version>
+		    <scope>system</scope>
+		    <systemPath>
+		        {env.HOME}/src/main/webapp/WEB-INF/lib/starmetal.jar
+		    </systemPath>
+		</dependency>
 	</dependencies>
 
 	<properties>

@@ -82,4 +82,55 @@ public class DAORotas {
 		
 		return QueryExecutor(query);
 	}
+	
+	//========================= FUNÇÕES AUXILIARES =========================
+	
+	public JSONArray procurarRotaSimples(int x, int y) {
+		QueryMaker withStatement = new QueryMaker();
+		withStatement.select("DISTINCT A.codigo_linha", "A.direcao")
+					 .from("pontos_de_onibus A, pontos_de_onibus B")
+					 .where("A.numero_ponto", x)
+					 .where("B.numero_ponto", y)
+					 .where("A.codigo_linha = B.codigo_linha")
+					 .where("A.seq < B.seq")
+					 .where("A.direcao = B.direcao");
+		
+		QueryMaker query = new QueryMaker();
+		query.with(withStatement, "linha")
+			 .select("A.seq", "A.numero_ponto", "A.codigo_linha", "ST_AsGeoJSON(geom, 15, 0) geojson")
+			 .from("pontos_de_onibus A")
+			 .where("(A.seq >= (SELECT MIN(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = 'X' AND direcao = A.direcao) " + 
+			 		"AND A.seq <= (SELECT MAX(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = 'Y' AND direcao = A.direcao))")
+			 .where("A.codigo_linha IN (SELECT A.codigo_linha FROM linha WHERE direcao = A.direcao)")
+			 .orderBy("codigo_linha, seq");
+		
+		return QueryExecutor(query);
+	}
+	
+	public JSONArray procurarTerminalOrigem(int x) {
+		QueryMaker query = new QueryMaker();
+		query.select("DISTINCT B.endereco", "B.numero_ponto")
+			 .from("pontos_de_onibus A, pontos_de_onibus B")
+			 .where("A.numero_ponto", x)
+			 .where("A.codigo_linha = B.codigo_linha")
+			 .where("A.seq < B.seq")
+			 .where("A.direcao = B.direcao")
+			 .where("(position('SITES' in B.endereco) = 1 OR position('Terminal' in B.endereco) = 1")
+			 .where("(B.tipo = 'Plataforma' OR B.tipo = 'Estação tubo') OR position('Estação Tubo' in B.endereco) = 1)");
+		
+		return QueryExecutor(query);
+	}
+	
+	public JSONArray procurarTerminalDestino(int y) {
+		QueryMaker query = new QueryMaker();
+		query.select("DISTINCT A.endereco, A.numero_ponto")
+			 .from("pontos_de_onibus A, pontos_de_onibus B")
+			 .where("B.numero_ponto", y)
+			 .where("A.codigo_linha = B.codigo_linha")
+			 .where("A.seq < B.seq")
+			 .where("(position('SITES' in A.endereco) = 1 OR position('Terminal' in A.endereco) = 1")
+			 .where("(A.tipo = 'Plataforma' OR A.tipo = 'Estação tubo') OR position('Estação Tubo' in A.endereco) = 1)");
+		
+		return QueryExecutor(query);
+	}
 }
