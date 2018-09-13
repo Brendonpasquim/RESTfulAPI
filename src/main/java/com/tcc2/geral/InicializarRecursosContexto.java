@@ -19,7 +19,7 @@ public class InicializarRecursosContexto implements ServletContextListener{
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		LOG.log(Level.INFO, "Inicializando CONTEXTO");
-		daoUTFPR = new DAOBaseUTFPR(false);
+		daoUTFPR = new DAOBaseUTFPR(true);
 		daoUTFPR.getConnectionFactory().openConnectionWithSSH();
 		
 		ServletContext context = sce.getServletContext();
