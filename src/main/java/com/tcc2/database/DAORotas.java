@@ -1,56 +1,55 @@
 package com.tcc2.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.json.JSONArray;
 
 import br.com.starmetal.database.postgresql.QueryMaker;
-import br.com.starmetal.exceptions.DatabaseException;
 
 public class DAORotas {
 
-	private Connection connection;
-	
-	public DAORotas(Connection connection) {
-		this.connection = connection;
+	private DAOPontos daoPontos;
+	private QueryExecutor executar;
+
+	public DAORotas(DAOManager manager) {
+		this.daoPontos = manager.getDAOPontos(); 
+		this.executar = manager.getQueryExecutor();
 	}
 	
-	/**
-	 * Executa a query
-	 * @param query
-	 * @param connection
-	 * @return
-	 */
-	private JSONArray QueryExecutor(QueryMaker query) {
-		if(query == null) {
-			return new JSONArray();
-		}
+	public JSONArray consultarRotaSimples(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
+		JSONArray listaPontosProximosOrigem = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeOrigem, longitudeOrigen);
+		JSONArray listaPontosProximosDestino = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeDestino, longitudeDestino);
 		
-		PreparedStatement statement = null;
-		ResultSet result = null;
-		JSONArray jsonArray;
-		try {
-			statement = connection.prepareStatement(query.getQuery());
-            result = statement.executeQuery();
-			jsonArray = Parser.toJSON(result);
+		int numeroPontoX;
+		int numeroPontoY;
+		JSONArray rota = new JSONArray();
+		for(int x = 0; x < listaPontosProximosOrigem.length(); x++) {
+			numeroPontoX = listaPontosProximosOrigem.getJSONObject(x).getInt("numero_ponto");
 			
-		} catch(SQLException sqle) {
-			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
-		} finally {
-			try{
+			for(int y = 0; y < listaPontosProximosDestino.length(); y++) {
+				numeroPontoY = listaPontosProximosDestino.getJSONObject(y).getInt("numero_ponto");
 				
-				if(statement 	!= null) statement.close();
-				if(result 		!= null) result.close();
+				rota = procurarRotaSimples(x, y);
 				
-			} catch(SQLException sqle) {
-				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.", sqle.getMessage());
+				if(rota.length() > 0) {
+					JSONArray temp;
+					String codigoLinha;
+					
+					for(int indiceRota = 0; indiceRota < rota.length(); indiceRota++) {
+						temp = procurarPonto(numeroPontoX);
+						rota.getJSONObject(indiceRota).put("dados_ponto_origem", temp.getJSONObject(0));
+						
+						temp = procurarPonto(numeroPontoY);
+						rota.getJSONObject(indiceRota).put("dados_ponto_destino", temp.getJSONObject(0));
+						
+						codigoLinha = rota.getJSONObject(indiceRota).getString("codigo_linha");
+						
+						temp = procurarLinha(codigoLinha);
+						rota.getJSONObject(indiceRota).put("dados_linha", temp.getJSONObject(0));
+					}
+				}
 			}
 		}
 		
-		return jsonArray;
+		return rota;
 	}
 	
 	/**
@@ -65,7 +64,7 @@ public class DAORotas {
 			 .where("R.codigo_linha = L.codigo_linha")
 			 .where("R.numero_ponto = P.numero_ponto");
 		
-		return QueryExecutor(query);
+		return executar.QueryExecutor(query);
 	}
 	
 	/**
@@ -80,10 +79,54 @@ public class DAORotas {
 			 .where("R.codigo_linha = L.codigo_linha")
 			 .where("R.numero_ponto = P.numero_ponto");
 		
-		return QueryExecutor(query);
+		return executar.QueryExecutor(query);
 	}
 	
 	//========================= FUNÇÕES AUXILIARES =========================
+	
+	public JSONArray procurarPonto(int x) {
+		QueryMaker queryPrincipal = new QueryMaker();
+		queryPrincipal.select("numero_ponto", "endereco", "tipo, ST_AsGeoJSON(geom, 15, 0) as geojson")
+					  .from("pontos_de_onibus ")
+					  .where("numero_ponto ", x);
+		
+		QueryMaker querySecundaria = new QueryMaker();
+		querySecundaria.select("tipo", "COUNT(tipo) as count_tipos", "peso")
+					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
+					   .where("A.tipo = B.tipo")
+					   .where("A.numero_ponto", String.valueOf(x))
+					   .groupBy("A.tipo", "A.peso");
+		
+		JSONArray principal = executar.QueryExecutor(queryPrincipal);
+		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
+		
+		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
+		principal.getJSONObject(0).put("ocorrencias", secundaria);
+		
+		return principal;
+	}
+	
+	public JSONArray procurarLinha(String codigoLinha) {
+		QueryMaker queryPrincipal = new QueryMaker();
+		queryPrincipal.select("codigo_linha", "nome_linha", "cor", "categoria", "apenas_cartao", "adaptado")
+					  .from("linhas_de_onibus")
+					  .where("codigo_linha", codigoLinha);
+		
+		QueryMaker querySecundaria = new QueryMaker();
+		querySecundaria.select("tipo", "COUNT(tipo) as count_tipos", "peso")
+					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
+					   .where("A.tipo = B.tipo")
+					   .where("A.codigo_linha", codigoLinha)
+					   .groupBy("A.tipo", "A.peso");
+		
+		JSONArray principal = executar.QueryExecutor(queryPrincipal);
+		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
+		
+		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
+		principal.getJSONObject(0).put("ocorrencias", secundaria);
+		
+		return principal;
+	}
 	
 	public JSONArray procurarRotaSimples(int x, int y) {
 		QueryMaker withStatement = new QueryMaker();
@@ -104,7 +147,7 @@ public class DAORotas {
 			 .where("A.codigo_linha IN (SELECT A.codigo_linha FROM linha WHERE direcao = A.direcao)")
 			 .orderBy("codigo_linha, seq");
 		
-		return QueryExecutor(query);
+		return executar.QueryExecutor(query);
 	}
 	
 	public JSONArray procurarTerminalOrigem(int x) {
@@ -118,7 +161,7 @@ public class DAORotas {
 			 .where("(position('SITES' in B.endereco) = 1 OR position('Terminal' in B.endereco) = 1")
 			 .where("(B.tipo = 'Plataforma' OR B.tipo = 'Estação tubo') OR position('Estação Tubo' in B.endereco) = 1)");
 		
-		return QueryExecutor(query);
+		return executar.QueryExecutor(query);
 	}
 	
 	public JSONArray procurarTerminalDestino(int y) {
@@ -131,6 +174,6 @@ public class DAORotas {
 			 .where("(position('SITES' in A.endereco) = 1 OR position('Terminal' in A.endereco) = 1")
 			 .where("(A.tipo = 'Plataforma' OR A.tipo = 'Estação tubo') OR position('Estação Tubo' in A.endereco) = 1)");
 		
-		return QueryExecutor(query);
+		return executar.QueryExecutor(query);
 	}
 }

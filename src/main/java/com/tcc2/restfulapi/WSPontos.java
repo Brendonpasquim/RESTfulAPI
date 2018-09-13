@@ -21,7 +21,7 @@ import com.tcc2.database.DAOManager;
 public class WSPontos {
 	
 	@Context
-	ServletContext context;
+	DAOManager manager;
 	
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -37,7 +37,7 @@ public class WSPontos {
 				
 		
 		
-        List<PontosProximos> lista = new DAOManager(context).getDAOPontos().consultarPontosDeOnibusProximos(latitude, longitude);
+        List<PontosProximos> lista = manager.getDAOPontos().consultarPontosDeOnibusProximos(latitude, longitude);
 		return Response.ok(lista).build();
 	}
 	
@@ -46,7 +46,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarPontos() {
 		
-		JSONArray pontos = new DAOManager(context).getDAOPontos().consultarPontosDeOnibus();
+		JSONArray pontos = manager.getDAOPontos().consultarPontosDeOnibus();
 		return pontos.toString();
 	}
 	
@@ -55,7 +55,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarTiposDePontos() {
 		
-		JSONArray tipos = new DAOManager(context).getDAOPontos().consultarTiposDePonto();
+		JSONArray tipos = manager.getDAOPontos().consultarTiposDePonto();
 		return tipos.toString();
 	}
 	
@@ -64,7 +64,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarBairros() {
 		
-		JSONArray bairros = new DAOManager(context).getDAOPontos().consultarBairros();
+		JSONArray bairros = manager.getDAOPontos().consultarBairros();
 		return bairros.toString();
 	}
 	
@@ -73,7 +73,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarLinhas() {
 		
-		JSONArray linhas = new DAOManager(context).getDAOPontos().consultarLinhas();
+		JSONArray linhas = manager.getDAOPontos().consultarLinhas();
 		return linhas.toString();
 	}
 	
@@ -83,7 +83,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarCategoriaDeLinha() {
 		
-		JSONArray categorias = new DAOManager(context).getDAOPontos().consultarCategoriasDeLinhas();
+		JSONArray categorias = manager.getDAOPontos().consultarCategoriasDeLinhas();
 		return categorias.toString();
 	}
 	
@@ -93,7 +93,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarItinerarios() {
 		
-		JSONArray itinerarios = new DAOManager(context).getDAOPontos().consultarItinerarios();
+		JSONArray itinerarios = manager.getDAOPontos().consultarItinerarios();
 		return itinerarios.toString();
 	}
 	
@@ -102,7 +102,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarHorarios() {
 		
-		JSONArray horarios = new DAOManager(context).getDAOPontos().consultarHorarios();
+		JSONArray horarios = manager.getDAOPontos().consultarHorarios();
 		return horarios.toString();
 	}
 
@@ -111,7 +111,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarProblemasOnibus() {
 		
-		JSONArray problemasOnibus = new DAOManager(context).getDAOPontos().consultarProblemasOnibusCrowdsourcing();
+		JSONArray problemasOnibus = manager.getDAOPontos().consultarProblemasOnibusCrowdsourcing();
 		return problemasOnibus.toString();
 	}
 	
@@ -120,7 +120,7 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarProblemasLinhas() {
 
-		JSONArray problemasLinhas = new DAOManager(context).getDAOPontos().consultarProblemasLinhasCrowdsourcing();
+		JSONArray problemasLinhas = manager.getDAOPontos().consultarProblemasLinhasCrowdsourcing();
 		return problemasLinhas.toString();
 	}
 }

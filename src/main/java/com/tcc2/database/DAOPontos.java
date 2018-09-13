@@ -16,46 +16,14 @@ import br.com.starmetal.exceptions.DatabaseException;
 
 public class DAOPontos {
 
+	@Deprecated
     private Connection connection;
+    private QueryExecutor executar;
 
-    public DAOPontos(Connection connection){
-        this.connection = connection;
+    public DAOPontos(DAOManager manager){
+        this.connection = manager.getConnection();
+        this.executar = manager.getQueryExecutor();
     }
-
-	/**
-	 * Executa a query e mantém a conexão disponível para uso.
-	 * @param query
-	 * @param connection
-	 * @return
-	 */
-	private JSONArray QueryExecutor(QueryMaker query) {
-		if(query == null) {
-			return new JSONArray();
-		}
-		
-		PreparedStatement statement = null;
-		ResultSet result = null;
-		JSONArray jsonArray;
-		try {
-			statement = connection.prepareStatement(query.getQuery());
-            result = statement.executeQuery();
-			jsonArray = Parser.toJSON(result);
-			
-		} catch(SQLException sqle) {
-			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
-		} finally {
-			try{
-				
-				if(statement 	!= null) statement.close();
-				if(result 		!= null) result.close();
-				
-			} catch(SQLException sqle) {
-				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.", sqle.getMessage());
-			}
-		}
-		
-		return jsonArray;
-	}
     
     /**
      * A partir de uma coordenada latitude e longitude determina Pontos de ônibus próximos,
@@ -94,13 +62,19 @@ public class DAOPontos {
     	return listaDePontos;
     }
     
+    /**
+     * 
+     * @param latitude
+     * @param longitude
+     * @return
+     */
     public JSONArray consultarPontosDeOnibusProximosSimplificado(double latitude, double longitude) {
     	QueryMaker query = new QueryMaker();
     	query.select("numero_ponto")
     		 .from("pontos_de_onibus")
     		 .where("ST_Within(geom, ST_buffer(ST_GeomFromText('POINT(lon_origem lat_origem)', 4326), 0.0025))");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -115,7 +89,7 @@ public class DAOPontos {
         	 .where("P.codigo_linha = L.codigo_linha")
         	 .orderBy("P.numero_ponto");
         
-        return QueryExecutor(query);
+        return executar.QueryExecutor(query);
     }
 
     /**
@@ -128,7 +102,7 @@ public class DAOPontos {
     		 .from("pontos_de_onibus")
     		 .orderBy("tipo");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -141,7 +115,7 @@ public class DAOPontos {
     		 .from("divisa_de_bairros")
     		 .orderBy("nome");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -154,7 +128,7 @@ public class DAOPontos {
     		 .from("linhas_de_onibus ")
     		 .orderBy("codigo_linha");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -167,7 +141,7 @@ public class DAOPontos {
     		 .from("linhas_de_onibus  ")
     		 .orderBy("categoria");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -187,7 +161,7 @@ public class DAOPontos {
 		     .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
 		     .orderBy("nome_linha");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -200,7 +174,7 @@ public class DAOPontos {
     		 .from("horarios_de_onibus")
     		 .orderBy("codigo_linha", "ponto", "tipo_dia", "horario_saida");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -214,7 +188,7 @@ public class DAOPontos {
     		 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
     		 .where("C.numero_ponto = P.numero_ponto");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
     
     /**
@@ -228,6 +202,6 @@ public class DAOPontos {
     		 .where("ST_Within(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
     		 .where("L.codigo_linha = C.codigo_linha");
     	
-    	return QueryExecutor(query);
+    	return executar.QueryExecutor(query);
     }
 }

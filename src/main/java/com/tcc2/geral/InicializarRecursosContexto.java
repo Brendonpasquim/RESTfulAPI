@@ -1,4 +1,4 @@
-package com.tcc2.restfulapi;
+package com.tcc2.geral;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,22 +13,23 @@ import com.tcc2.database.DAOBaseUTFPR;
 @WebListener
 public class InicializarRecursosContexto implements ServletContextListener{
 	
+	private static final Logger LOG = Logger.getLogger(InicializarRecursosContexto.class.getName());
 	private DAOBaseUTFPR daoUTFPR;
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		Logger.getLogger(InicializarRecursosContexto.class.getName()).log(Level.INFO, "Inicializando CONTEXTO");
-		daoUTFPR = new DAOBaseUTFPR(true);
+		LOG.log(Level.INFO, "Inicializando CONTEXTO");
+		daoUTFPR = new DAOBaseUTFPR(false);
 		daoUTFPR.getConnectionFactory().openConnectionWithSSH();
 		
 		ServletContext context = sce.getServletContext();
-		Logger.getLogger(InicializarRecursosContexto.class.getName()).log(Level.INFO, "Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
+		LOG.log(Level.INFO, "Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
 		context.setAttribute("daoUTFPR", daoUTFPR);
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		Logger.getLogger(InicializarRecursosContexto.class.getName()).log(Level.INFO, "Encerrando CONTEXTO");
+		LOG.log(Level.INFO, "Encerrando CONTEXTO");
 		daoUTFPR.getConnectionFactory().closeConnectionWithSSH();
 	}
 	
