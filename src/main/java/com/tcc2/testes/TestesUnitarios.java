@@ -93,11 +93,25 @@ public class TestesUnitarios {
         	 .where("P.codigo_linha = L.codigo_linha ORDER BY P.numero_ponto");
         
         query.printQuery();
+        
+        System.out.println();
+        
+		QueryMaker query2 = new QueryMaker();
+		query2.select("A.seq", "A.numero_ponto", "A.codigo_linha", "ST_AsGeoJSON(geom, 15, 0) geojson")
+			 .from("pontos_de_onibus A")
+			 .where("(A.seq >= (SELECT MIN(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':X' AND direcao = A.direcao) " + 
+			 		"AND A.seq <= (SELECT MAX(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':Y' AND direcao = A.direcao))")
+			 .setParameter("X", 1)
+			 .setParameter("Y", 2)
+			 .where("A.codigo_linha", String.valueOf(147))
+			 .orderBy("codigo_linha, seq");
+		
+		query2.printQuery();
 	}
 	
 	public static void main(String[] args) {
-		TestesUnitarios.TesteIO();
-		TestesUnitarios.TesteSSH();
+//		TestesUnitarios.TesteIO();
+//		TestesUnitarios.TesteSSH();
 //		TestesUnitarios.TesteSSH2();
 		TestesUnitarios.TesteQueryMaker();
 	}

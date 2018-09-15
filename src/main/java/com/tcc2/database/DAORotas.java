@@ -27,7 +27,7 @@ public class DAORotas {
 			for(int y = 0; y < listaPontosProximosDestino.length(); y++) {
 				numeroPontoY = listaPontosProximosDestino.getJSONObject(y).getInt("numero_ponto");
 				
-				rota = procurarRotaSimples(x, y);
+				rota = procurarRotaSimples(numeroPontoX, numeroPontoY);
 				
 				if(rota.length() > 0) {
 					JSONArray temp;
@@ -44,6 +44,9 @@ public class DAORotas {
 						
 						temp = procurarLinha(codigoLinha);
 						rota.getJSONObject(indiceRota).put("dados_linha", temp.getJSONObject(0));
+						
+						temp = consultarInfoRotaSimples(numeroPontoX, numeroPontoY, codigoLinha);
+						rota.getJSONObject(indiceRota).put("info_rota", temp);
 					}
 				}
 			}
@@ -129,22 +132,28 @@ public class DAORotas {
 	}
 	
 	public JSONArray procurarRotaSimples(int x, int y) {
-		QueryMaker withStatement = new QueryMaker();
-		withStatement.select("DISTINCT A.codigo_linha", "A.direcao")
-					 .from("pontos_de_onibus A, pontos_de_onibus B")
-					 .where("A.numero_ponto", x)
-					 .where("B.numero_ponto", y)
-					 .where("A.codigo_linha = B.codigo_linha")
-					 .where("A.seq < B.seq")
-					 .where("A.direcao = B.direcao");
+		QueryMaker query = new QueryMaker();
+		query.select("DISTINCT A.codigo_linha", "A.direcao")
+			 .from("pontos_de_onibus A, pontos_de_onibus B")
+			 .where("A.numero_ponto", x)
+			 .where("B.numero_ponto", y)
+			 .where("A.codigo_linha = B.codigo_linha")
+			 .where("A.seq < B.seq")
+			 .where("A.direcao = B.direcao");
+		
+		return executar.QueryExecutor(query);
+	}
+	
+	public JSONArray consultarInfoRotaSimples(int x, int y, String l) {
+		
+		String subQuery = "(A.seq >= (SELECT MIN(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':X' AND direcao = A.direcao) " + 
+		 				  "AND A.seq <= (SELECT MAX(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':Y' AND direcao = A.direcao))";
 		
 		QueryMaker query = new QueryMaker();
-		query.with(withStatement, "linha")
-			 .select("A.seq", "A.numero_ponto", "A.codigo_linha", "ST_AsGeoJSON(geom, 15, 0) geojson")
+		query.select("A.seq", "A.numero_ponto", "A.codigo_linha", "ST_AsGeoJSON(geom, 15, 0) geojson")
 			 .from("pontos_de_onibus A")
-			 .where("(A.seq >= (SELECT MIN(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = 'X' AND direcao = A.direcao) " + 
-			 		"AND A.seq <= (SELECT MAX(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = 'Y' AND direcao = A.direcao))")
-			 .where("A.codigo_linha IN (SELECT A.codigo_linha FROM linha WHERE direcao = A.direcao)")
+			 .where(subQuery).setParameter("X", x).setParameter("Y", y)
+			 .where("A.codigo_linha", l)
 			 .orderBy("codigo_linha, seq");
 		
 		return executar.QueryExecutor(query);

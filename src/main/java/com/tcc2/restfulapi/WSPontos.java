@@ -2,7 +2,6 @@ package com.tcc2.restfulapi;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,8 +33,6 @@ public class WSPontos {
 	@Produces(MediaType.APPLICATION_JSON)	
 	public Response consultarPontosProximos(@NotNull @QueryParam("latitude") double latitude, 
 											@NotNull @QueryParam("longitude") double longitude) {
-				
-		
 		
         List<PontosProximos> lista = manager.getDAOPontos().consultarPontosDeOnibusProximos(latitude, longitude);
 		return Response.ok(lista).build();
