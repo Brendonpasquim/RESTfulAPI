@@ -147,18 +147,18 @@ public class DAORotas {
 	
 	//========================= FUNÇÕES AUXILIARES =========================
 	
-	public JSONArray procurarPonto(int x) {
+	public JSONArray procurarPonto(int numeroPonto) {
 		QueryMaker queryPrincipal = new QueryMaker();
 		queryPrincipal.select("numero_ponto", "endereco", "tipo, ST_AsGeoJSON(geom, 15, 0) as geojson")
-					  .from("pontos_de_onibus ")
-					  .where("numero_ponto ", x);
+					  .from("pontos_de_onibus")
+					  .where("numero_ponto ", numeroPonto);
 		
 		QueryMaker querySecundaria = new QueryMaker();
-		querySecundaria.select("tipo", "COUNT(tipo) as count_tipos", "peso")
-					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
+		querySecundaria.select("A.tipo", "COUNT(A.tipo) as count_tipos", "B.peso")
+					   .from("crowdsourcing_pontos A, crowdsourcing_regras B")
 					   .where("A.tipo = B.tipo")
-					   .where("A.numero_ponto", String.valueOf(x))
-					   .groupBy("A.tipo", "A.peso");
+					   .where("A.numero_ponto", numeroPonto)
+					   .groupBy("A.tipo", "B.peso");
 		
 		JSONArray principal = executar.QueryExecutor(queryPrincipal);
 		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
@@ -171,16 +171,16 @@ public class DAORotas {
 	
 	public JSONArray procurarLinha(String codigoLinha) {
 		QueryMaker queryPrincipal = new QueryMaker();
-		queryPrincipal.select("codigo_linha", "nome_linha", "cor", "categoria", "apenas_cartao", "adaptado")
+		queryPrincipal.select("codigo_linha", "nome_linha", "cor", "categoria", "apenas_cartao")
 					  .from("linhas_de_onibus")
 					  .where("codigo_linha", codigoLinha);
 		
 		QueryMaker querySecundaria = new QueryMaker();
-		querySecundaria.select("tipo", "COUNT(tipo) as count_tipos", "peso")
+		querySecundaria.select("B.tipo", "COUNT(B.tipo) as count_tipos", "B.peso")
 					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
 					   .where("A.tipo = B.tipo")
 					   .where("A.codigo_linha", codigoLinha)
-					   .groupBy("A.tipo", "A.peso");
+					   .groupBy("B.tipo", "B.peso");
 		
 		JSONArray principal = executar.QueryExecutor(queryPrincipal);
 		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
@@ -191,12 +191,12 @@ public class DAORotas {
 		return principal;
 	}
 	
-	public JSONArray procurarRotaSimples(int x, int y) {
+	public JSONArray procurarRotaSimples(int numeroPontoOrigem, int numeroPontoDestino) {
 		QueryMaker query = new QueryMaker();
 		query.select("DISTINCT A.codigo_linha", "A.direcao")
 			 .from("pontos_de_onibus A, pontos_de_onibus B")
-			 .where("A.numero_ponto", x)
-			 .where("B.numero_ponto", y)
+			 .where("A.numero_ponto", numeroPontoOrigem)
+			 .where("B.numero_ponto", numeroPontoDestino)
 			 .where("A.codigo_linha = B.codigo_linha")
 			 .where("A.seq < B.seq")
 			 .where("A.direcao = B.direcao");
@@ -204,7 +204,7 @@ public class DAORotas {
 		return executar.QueryExecutor(query);
 	}
 	
-	public JSONArray consultarInfoRotaSimples(int x, int y, String l) {
+	public JSONArray consultarInfoRotaSimples(int numeroPontoOrigem, int numeroPontoDestino, String codigoLinha) {
 		
 		String subQuery = "(A.seq >= (SELECT MIN(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':X' AND direcao = A.direcao) " + 
 		 				  "AND A.seq <= (SELECT MAX(seq) FROM pontos_de_onibus WHERE codigo_linha = A.codigo_linha AND numero_ponto = ':Y' AND direcao = A.direcao))";
@@ -212,18 +212,18 @@ public class DAORotas {
 		QueryMaker query = new QueryMaker();
 		query.select("A.seq", "A.numero_ponto", "A.codigo_linha", "ST_AsGeoJSON(geom, 15, 0) geojson")
 			 .from("pontos_de_onibus A")
-			 .where(subQuery).setParameter("X", x).setParameter("Y", y)
-			 .where("A.codigo_linha", l)
+			 .where(subQuery).setParameter("X", numeroPontoOrigem).setParameter("Y", numeroPontoDestino)
+			 .where("A.codigo_linha", codigoLinha)
 			 .orderBy("codigo_linha, seq");
 		
 		return executar.QueryExecutor(query);
 	}
 	
-	public JSONArray procurarTerminalOrigem(int x) {
+	public JSONArray procurarTerminalOrigem(int numeroPonto) {
 		QueryMaker query = new QueryMaker();
 		query.select("DISTINCT B.endereco", "B.numero_ponto")
 			 .from("pontos_de_onibus A, pontos_de_onibus B")
-			 .where("A.numero_ponto", x)
+			 .where("A.numero_ponto", numeroPonto)
 			 .where("A.codigo_linha = B.codigo_linha")
 			 .where("A.seq < B.seq")
 			 .where("A.direcao = B.direcao")
@@ -233,11 +233,11 @@ public class DAORotas {
 		return executar.QueryExecutor(query);
 	}
 	
-	public JSONArray procurarTerminalDestino(int y) {
+	public JSONArray procurarTerminalDestino(int numeroPonto) {
 		QueryMaker query = new QueryMaker();
 		query.select("DISTINCT A.endereco, A.numero_ponto")
 			 .from("pontos_de_onibus A, pontos_de_onibus B")
-			 .where("B.numero_ponto", y)
+			 .where("B.numero_ponto", numeroPonto)
 			 .where("A.codigo_linha = B.codigo_linha")
 			 .where("A.seq < B.seq")
 			 .where("(position('SITES' in A.endereco) = 1 OR position('Terminal' in A.endereco) = 1")
