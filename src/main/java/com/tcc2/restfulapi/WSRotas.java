@@ -32,8 +32,17 @@ public class WSRotas {
 									   @NotNull @QueryParam("latitude_destino")  double latitudeDestino,
 									   @NotNull @QueryParam("longitude_destino") double longitudeDestino) {
 		
-		JSONArray rotaSimples = manager.getDAORotas().consultarRotaSimples(latitudeOrigem, longitudeOrigen, latitudeDestino, longitudeDestino);
+		JSONArray rotaSimples = manager.getDAORotas().consultarRotaSimplesEntrePontosProximos(latitudeOrigem, longitudeOrigen, latitudeDestino, longitudeDestino);
 		return rotaSimples.toString();
+	}
+	
+	@GET
+	@Path("rota_simples_dois_pontos")
+	public String consultarRotaSimplesEntreDoisPontos(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
+													  @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
+		
+		JSONArray rotaSimplesEntreDoisPontos = manager.getDAORotas().consultarRotaSimplesEntreDoisPontos(numeroPontoOrigem, numeroPontoDestino);
+		return rotaSimplesEntreDoisPontos.toString();
 	}
 
 }

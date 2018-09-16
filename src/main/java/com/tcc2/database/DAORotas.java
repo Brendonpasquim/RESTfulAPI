@@ -1,5 +1,7 @@
 package com.tcc2.database;
 
+import java.util.logging.Logger;
+
 import org.json.JSONArray;
 
 import br.com.starmetal.database.postgresql.QueryMaker;
@@ -8,36 +10,53 @@ public class DAORotas {
 
 	private DAOPontos daoPontos;
 	private QueryExecutor executar;
-
+	private static final Logger LOG = Logger.getLogger(DAORotas.class.getName());
+	
 	public DAORotas(DAOManager manager) {
 		this.daoPontos = manager.getDAOPontos(); 
 		this.executar = manager.getQueryExecutor();
 	}
 	
-	public JSONArray consultarRotaSimples(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
+	/**
+	 * Faz a consulta por rotas entre dois pontos, considerando todos os pontos próximos
+	 * de uma dada origem e um dado destino.
+	 * 
+	 * @param latitudeOrigem
+	 * @param longitudeOrigen
+	 * @param latitudeDestino
+	 * @param longitudeDestino
+	 * @return
+	 */
+	public JSONArray consultarRotaSimplesEntrePontosProximos(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
+		if(latitudeOrigem < 0 || longitudeOrigen < 0 || latitudeDestino < 0 || longitudeDestino < 0) {
+			String mensagemValidacao = "Parâmetros inválidos fornecidos no método 'consultarRotaSimplesEntrePontosProximos'. Valores fornecidos são: '%f' '%f' '%f' '%f'"; 
+			LOG.warning(String.format(mensagemValidacao, latitudeOrigem, longitudeOrigen, latitudeDestino, longitudeDestino));
+			return new JSONArray();
+		}
+		
 		JSONArray listaPontosProximosOrigem = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeOrigem, longitudeOrigen);
 		JSONArray listaPontosProximosDestino = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeDestino, longitudeDestino);
 		
-		int numeroPontoX;
-		int numeroPontoY;
+		int numeroPontoOrigem;
+		int numeroPontoDestino;
 		JSONArray rota = new JSONArray();
-		for(int x = 0; x < listaPontosProximosOrigem.length(); x++) {
-			numeroPontoX = listaPontosProximosOrigem.getJSONObject(x).getInt("numero_ponto");
+		for(int indiceOrigem = 0; indiceOrigem < listaPontosProximosOrigem.length(); indiceOrigem++) {
+			numeroPontoOrigem = listaPontosProximosOrigem.getJSONObject(indiceOrigem).getInt("numero_ponto");
 			
-			for(int y = 0; y < listaPontosProximosDestino.length(); y++) {
-				numeroPontoY = listaPontosProximosDestino.getJSONObject(y).getInt("numero_ponto");
+			for(int indiceDestino = 0; indiceDestino < listaPontosProximosDestino.length(); indiceDestino++) {
+				numeroPontoDestino = listaPontosProximosDestino.getJSONObject(indiceDestino).getInt("numero_ponto");
 				
-				rota = procurarRotaSimples(numeroPontoX, numeroPontoY);
+				rota = procurarRotaSimples(numeroPontoOrigem, numeroPontoDestino);
 				
 				if(rota.length() > 0) {
 					JSONArray temp;
 					String codigoLinha;
 					
 					for(int indiceRota = 0; indiceRota < rota.length(); indiceRota++) {
-						temp = procurarPonto(numeroPontoX);
+						temp = procurarPonto(numeroPontoOrigem);
 						rota.getJSONObject(indiceRota).put("dados_ponto_origem", temp.getJSONObject(0));
 						
-						temp = procurarPonto(numeroPontoY);
+						temp = procurarPonto(numeroPontoDestino);
 						rota.getJSONObject(indiceRota).put("dados_ponto_destino", temp.getJSONObject(0));
 						
 						codigoLinha = rota.getJSONObject(indiceRota).getString("codigo_linha");
@@ -45,10 +64,51 @@ public class DAORotas {
 						temp = procurarLinha(codigoLinha);
 						rota.getJSONObject(indiceRota).put("dados_linha", temp.getJSONObject(0));
 						
-						temp = consultarInfoRotaSimples(numeroPontoX, numeroPontoY, codigoLinha);
+						temp = consultarInfoRotaSimples(numeroPontoOrigem, numeroPontoDestino, codigoLinha);
 						rota.getJSONObject(indiceRota).put("info_rota", temp);
 					}
 				}
+			}
+		}
+		
+		return rota;
+	}
+
+	/**
+	 * Faz a consulta por rotas entre dois pontos, considerando especificamente os ponto de origem
+	 * e de destino fornecido por parâmetro.
+	 * 
+	 * @param numeroPontoOrigem
+	 * @param numeroPontoDestino
+	 * @return
+	 */
+	public JSONArray consultarRotaSimplesEntreDoisPontos(int numeroPontoOrigem, int numeroPontoDestino) {
+		if(numeroPontoOrigem < 0 || numeroPontoDestino < 0) {
+			String mensagemValidacao = "Parâmetros inválidos fornecidos no método 'consultarRotaSimplesEntreDoisPontos'. Valores fornecidos são: '%d' '%d'"; 
+			LOG.warning(String.format(mensagemValidacao, numeroPontoOrigem, numeroPontoDestino));
+			return new JSONArray();
+		}
+		
+		JSONArray rota = procurarRotaSimples(numeroPontoOrigem, numeroPontoDestino);
+		
+		if(rota.length() > 0) {
+			JSONArray temp;
+			String codigoLinha;
+			
+			for(int indiceRota = 0; indiceRota < rota.length(); indiceRota++) {
+				temp = procurarPonto(numeroPontoOrigem);
+				rota.getJSONObject(indiceRota).put("dados_ponto_origem", temp.getJSONObject(0));
+				
+				temp = procurarPonto(numeroPontoDestino);
+				rota.getJSONObject(indiceRota).put("dados_ponto_destino", temp.getJSONObject(0));
+				
+				codigoLinha = rota.getJSONObject(indiceRota).getString("codigo_linha");
+				
+				temp = procurarLinha(codigoLinha);
+				rota.getJSONObject(indiceRota).put("dados_linha", temp.getJSONObject(0));
+				
+				temp = consultarInfoRotaSimples(numeroPontoOrigem, numeroPontoDestino, codigoLinha);
+				rota.getJSONObject(indiceRota).put("info_rota", temp);
 			}
 		}
 		
