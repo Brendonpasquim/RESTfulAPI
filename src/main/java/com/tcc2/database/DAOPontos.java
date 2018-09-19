@@ -159,8 +159,8 @@ public class DAOPontos {
     	QueryMaker query = new QueryMaker();
     	query.with(clausuraWith, "tabela_aux")
     		 .select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
-			 .from("itinerarios_de_onibus ")
-		     .where("shape_len", "(SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
+			 .from("itinerarios_de_onibus")
+		     .where("shape_len = (SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
 		     .orderBy("nome_linha");
     	
     	return executar.QueryExecutor(query);

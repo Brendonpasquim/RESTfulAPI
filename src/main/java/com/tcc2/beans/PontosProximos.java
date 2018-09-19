@@ -1,15 +1,21 @@
 package com.tcc2.beans;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class PontosProximos {
 
+	@JsonbProperty("numero_ponto")
 	private int numeroPonto;
 	private String endereco;
 	private String tipo;
+	@JsonbProperty("codigo_linha")
 	private int codigoLinha;
 	private double latitude;
 	private double longitude;
+	@JsonbProperty("nome_linha")
 	private String nomeLinha;
 	private String cor;
+	@JsonbProperty("apenas_cartao")
 	private String apenasCartao;
 	private String geojson;
 
