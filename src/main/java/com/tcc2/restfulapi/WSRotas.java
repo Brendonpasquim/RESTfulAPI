@@ -38,6 +38,7 @@ public class WSRotas {
 	
 	@GET
 	@Path("rota_simples_dois_pontos")
+	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarRotaSimplesEntreDoisPontos(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
 													  @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
 		
@@ -45,4 +46,31 @@ public class WSRotas {
 		return rotaSimplesEntreDoisPontos.toString();
 	}
 
+	@GET
+	@Path("rota_conectada")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String consultarRotaConectada() {
+		
+		JSONArray rotaConectada = manager.getDAORotas().consultarRotaConectada();
+		return rotaConectada.toString();
+	}
+	
+	@GET
+	@Path("origem")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String consultarOrigemViagem() {
+		
+		JSONArray origemViagem = manager.getDAORotas().consultarOrigem();
+		return origemViagem.toString();
+	}
+	
+	@GET
+	@Path("destino")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String consultarDestinoViagem() {
+		
+		JSONArray destinoViagem = manager.getDAORotas().consultarDestino();
+		return destinoViagem.toString();
+	}
+	
 }

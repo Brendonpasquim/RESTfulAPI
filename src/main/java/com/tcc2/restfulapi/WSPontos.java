@@ -78,7 +78,7 @@ public class WSPontos {
 	@GET
 	@Path("categorias")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarCategoriaDeLinha() {
+	public String consultarCategoriasDeLinhas() {
 		
 		JSONArray categorias = manager.getDAOPontos().consultarCategoriasDeLinhas();
 		return categorias.toString();

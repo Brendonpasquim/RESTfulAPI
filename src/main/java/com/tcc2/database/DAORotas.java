@@ -115,6 +115,10 @@ public class DAORotas {
 		return rota;
 	}
 	
+	public JSONArray consultarRotaConectada() {
+		return new JSONArray();
+	}
+	
 	/**
 	 * 
 	 * @return
