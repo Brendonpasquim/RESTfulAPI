@@ -70,7 +70,7 @@ public class DAOPontos {
      */
     public JSONArray consultarPontosDeOnibusProximosSimplificado(double latitude, double longitude) {
     	QueryMaker query = new QueryMaker();
-    	query.select("numero_ponto")
+    	query.select("DISTINCT numero_ponto")
     		 .from("pontos_de_onibus")
     		 .where("ST_Within(geom, ST_buffer(ST_GeomFromText('POINT( :lon_origem :lat_origem)', 4326), 0.0025))")
     		 .setParameter("lon_origem", longitude)

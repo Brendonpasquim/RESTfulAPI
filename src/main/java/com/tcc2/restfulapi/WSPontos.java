@@ -39,6 +39,16 @@ public class WSPontos {
 	}
 	
 	@GET
+	@Path("pontos_proximos_simplificado")
+	@Produces(MediaType.APPLICATION_JSON)	
+	public String consultarPontosProximosSimplificado(@NotNull @QueryParam("latitude") double latitude, 
+													  @NotNull @QueryParam("longitude") double longitude) {
+		
+        JSONArray pontosProximosSimplificados = manager.getDAOPontos().consultarPontosDeOnibusProximosSimplificado(latitude, longitude);
+		return pontosProximosSimplificados.toString();
+	}	
+	
+	@GET
 	@Path("pontos")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarPontos() {
