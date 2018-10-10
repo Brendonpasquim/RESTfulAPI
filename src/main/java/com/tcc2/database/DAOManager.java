@@ -5,19 +5,20 @@ import java.sql.Connection;
 import javax.servlet.ServletContext;
 
 public class DAOManager {
-	private Connection connection = null;	
+	private Connection connection = null;
 	private DAORotas daoRotas = null;
 	private DAOPontos daoPontos = null;
-	private QueryExecutor queryExecutor;
+	private DAOCrowdsourcing daoCrowdsourcing = null;
+	private Executor queryExecutor;
 	
 	public DAOManager(Connection connection) {
 		this.connection = connection;
-		this.queryExecutor = new QueryExecutor(connection);
+		this.queryExecutor = new Executor(connection);
 	}
 	
 	public DAOManager(ServletContext context) {
 		this.connection = (Connection) context.getAttribute("connection");
-		this.queryExecutor = new QueryExecutor(this.connection);
+		this.queryExecutor = new Executor(this.connection);
 	}
 	
 	public DAORotas getDAORotas() {
@@ -36,11 +37,19 @@ public class DAOManager {
 		return this.daoPontos;
 	}
 	
+	public DAOCrowdsourcing getDAOCrowdsourcing() {
+		if(this.daoCrowdsourcing == null) {
+			return this.daoCrowdsourcing = new DAOCrowdsourcing(this);
+		}
+		
+		return this.daoCrowdsourcing;
+	}
+	
 	public Connection getConnection() {
 		return connection;
 	}
 	
-	public QueryExecutor getQueryExecutor() {
+	public Executor getQueryExecutor() {
 		return queryExecutor;
 	}
 }

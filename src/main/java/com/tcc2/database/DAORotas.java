@@ -9,7 +9,7 @@ import br.com.starmetal.database.postgresql.QueryMaker;
 public class DAORotas {
 
 	private DAOPontos daoPontos;
-	private QueryExecutor executar;
+	private Executor executar;
 	private static final Logger LOG = Logger.getLogger(DAORotas.class.getName());
 	
 	public DAORotas(DAOManager manager) {
@@ -131,7 +131,7 @@ public class DAORotas {
 			 .where("R.codigo_linha = L.codigo_linha")
 			 .where("R.numero_ponto = P.numero_ponto");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 	
 	/**
@@ -146,7 +146,7 @@ public class DAORotas {
 			 .where("R.codigo_linha = L.codigo_linha")
 			 .where("R.numero_ponto = P.numero_ponto");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 	
 	//========================= FUNÇÕES AUXILIARES =========================
@@ -164,8 +164,8 @@ public class DAORotas {
 					   .where("A.numero_ponto", numeroPonto)
 					   .groupBy("A.tipo", "B.peso");
 		
-		JSONArray principal = executar.QueryExecutor(queryPrincipal);
-		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
+		JSONArray principal = executar.queryExecutor(queryPrincipal);
+		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
 		principal.getJSONObject(0).put("ocorrencias", secundaria);
@@ -186,8 +186,8 @@ public class DAORotas {
 					   .where("A.codigo_linha", codigoLinha)
 					   .groupBy("B.tipo", "B.peso");
 		
-		JSONArray principal = executar.QueryExecutor(queryPrincipal);
-		JSONArray secundaria = executar.QueryExecutor(querySecundaria);
+		JSONArray principal = executar.queryExecutor(queryPrincipal);
+		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
 		principal.getJSONObject(0).put("ocorrencias", secundaria);
@@ -205,7 +205,7 @@ public class DAORotas {
 			 .where("A.seq < B.seq")
 			 .where("A.direcao = B.direcao");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 	
 	public JSONArray consultarInfoRotaSimples(int numeroPontoOrigem, int numeroPontoDestino, String codigoLinha) {
@@ -220,7 +220,7 @@ public class DAORotas {
 			 .where("A.codigo_linha", codigoLinha)
 			 .orderBy("codigo_linha, seq");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 	
 	public JSONArray procurarTerminalOrigem(int numeroPonto) {
@@ -234,7 +234,7 @@ public class DAORotas {
 			 .where("(position('SITES' in B.endereco) = 1 OR position('Terminal' in B.endereco) = 1")
 			 .where("(B.tipo = 'Plataforma' OR B.tipo = 'Estação tubo') OR position('Estação Tubo' in B.endereco) = 1)");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 	
 	public JSONArray procurarTerminalDestino(int numeroPonto) {
@@ -247,6 +247,6 @@ public class DAORotas {
 			 .where("(position('SITES' in A.endereco) = 1 OR position('Terminal' in A.endereco) = 1")
 			 .where("(A.tipo = 'Plataforma' OR A.tipo = 'Estação tubo') OR position('Estação Tubo' in A.endereco) = 1)");
 		
-		return executar.QueryExecutor(query);
+		return executar.queryExecutor(query);
 	}
 }

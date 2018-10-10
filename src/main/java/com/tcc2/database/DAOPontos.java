@@ -18,7 +18,7 @@ public class DAOPontos {
 
 	@Deprecated
     private Connection connection;
-    private QueryExecutor executar;
+    private Executor executar;
 
     public DAOPontos(DAOManager manager){
         this.connection = manager.getConnection();
@@ -76,7 +76,7 @@ public class DAOPontos {
     		 .setParameter("lon_origem", longitude)
     		 .setParameter("lat_origem", latitude);
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -86,12 +86,12 @@ public class DAOPontos {
      */
     public JSONArray consultarPontosDeOnibus() {
     	QueryMaker query = new QueryMaker();
-        query.select("P.numero_ponto", "P.endereco", "P.tipo", "P.codigo_linha", "L.nome_linha", "P.seq", "L.apenas_cartao", "ST_AsGeoJSON(P.geom, 15, 0) as geojson")
+        query.select("P.numero_ponto", "P.tipo", "P.endereco", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson", "P.codigo_linha", "L.nome_linha", "L.categoria", "L.cor", "L.apenas_cartao")
         	 .from("pontos_de_onibus P, linhas_de_onibus L")
         	 .where("P.codigo_linha = L.codigo_linha")
         	 .orderBy("P.numero_ponto");
         
-        return executar.QueryExecutor(query);
+        return executar.queryExecutor(query);
     }
 
     /**
@@ -104,7 +104,7 @@ public class DAOPontos {
     		 .from("pontos_de_onibus")
     		 .orderBy("tipo");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -117,7 +117,7 @@ public class DAOPontos {
     		 .from("divisa_de_bairros")
     		 .orderBy("nome");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -126,11 +126,11 @@ public class DAOPontos {
      */
     public JSONArray consultarLinhas() {
     	QueryMaker query = new QueryMaker();
-    	query.select("DISTINCT codigo_linha", "nome_linha")
-    		 .from("linhas_de_onibus ")
+    	query.select("L.codigo_linha", "L.nome_linha", "L.categoria", "L.cor", "L.apenas_cartao")
+    		 .from("linhas_de_onibus L")
     		 .orderBy("codigo_linha");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -143,7 +143,7 @@ public class DAOPontos {
     		 .from("linhas_de_onibus  ")
     		 .orderBy("categoria");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -157,13 +157,14 @@ public class DAOPontos {
     				.groupBy("codigo_linha");
     	
     	QueryMaker query = new QueryMaker();
-    	query.with(clausuraWith, "tabela_aux")
-    		 .select("nome_linha", "codigo_linha", "nome_categoria", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(geom, 29192), 4326), 15, 0) as geojson")
-			 .from("itinerarios_de_onibus")
-		     .where("shape_len = (SELECT tabela_aux.tamanho FROM tabela_aux WHERE tabela_aux.codigo_linha = itinerarios_de_onibus.codigo_linha)")
+    	query.with(clausuraWith, "tamanho_maximo")
+    		 .select("I.codigo_linha", "L.nome_linha", "L.categoria", "L.cor", "L.apenas_cartao", "ST_AsGeoJSON(ST_Transform(ST_SetSRID(I.geom, 29192), 4326), 15, 0) AS geojson")
+			 .from("itinerarios_de_onibus AS I, linhas_de_onibus AS L")
+			 .where("I.codigo_linha = L.codigo_linha")
+		     .where("shape_len = (SELECT T.tamanho FROM tamanho_maximo AS T WHERE T.codigo_linha = I.codigo_linha)")
 		     .orderBy("nome_linha");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -172,11 +173,11 @@ public class DAOPontos {
      */
     public JSONArray consultarHorarios() {
     	QueryMaker query = new QueryMaker();
-    	query.select("codigo_linha", "horario_saida", "ponto", "tipo_dia", "numero_ponto", "adaptado")
+    	query.select("numero_ponto", "ponto", "codigo_linha", "adaptado", "tipo_dia", "horario_saida")
     		 .from("horarios_de_onibus")
     		 .orderBy("codigo_linha", "ponto", "tipo_dia", "horario_saida");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -190,7 +191,7 @@ public class DAOPontos {
     		 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
     		 .where("C.numero_ponto = P.numero_ponto");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
     
     /**
@@ -204,6 +205,6 @@ public class DAOPontos {
     		 .where("ST_Within(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
     		 .where("L.codigo_linha = C.codigo_linha");
     	
-    	return executar.QueryExecutor(query);
+    	return executar.queryExecutor(query);
     }
 }

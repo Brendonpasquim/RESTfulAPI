@@ -7,24 +7,26 @@ import java.sql.SQLException;
 
 import org.json.JSONArray;
 
+import br.com.starmetal.database.postgresql.InsertMaker;
 import br.com.starmetal.database.postgresql.QueryMaker;
 import br.com.starmetal.exceptions.DatabaseException;
+import br.com.starmetal.results.ResultType;
 
-public class QueryExecutor {
+public class Executor {
 	
 	private Connection connection;
 	
-	public QueryExecutor(Connection connection) {
+	public Executor(Connection connection) {
 		this.connection = connection;
 	}
 	
 	/**
-	 * Executa a query
+	 * Executa uma consulta na base de dados.
 	 * @param query
 	 * @param connection
 	 * @return
 	 */
-	public JSONArray QueryExecutor(QueryMaker query) {
+	public JSONArray queryExecutor(final QueryMaker query) {
 		if(query == null) {
 			return new JSONArray();
 		}
@@ -52,6 +54,35 @@ public class QueryExecutor {
 		}
 		
 		return jsonArray;
+	}
+	
+	/**
+	 * Executa uma inserção na base de dados.
+	 * @param insert
+	 * @return
+	 */
+	public ResultType insertExecutor(final InsertMaker insert) {
+		if(insert == null) {
+			return ResultType.ERROR;
+		}
+		
+		PreparedStatement statement = null;
+		try {
+			statement = this.connection.prepareStatement(insert.getInsert());
+			statement.executeUpdate();
+		} catch(SQLException sqle) {
+			throw new DatabaseException("Problema ao executar insert na tabela 'relatorio_viagem'.", sqle);
+		} finally {
+			try {
+				
+				if(statement != null) statement.close();
+				
+			} catch(SQLException sqle) {
+				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.", sqle.getMessage());
+			}
+		}
+		
+		return ResultType.SUCESS;
 	}
 
 }
