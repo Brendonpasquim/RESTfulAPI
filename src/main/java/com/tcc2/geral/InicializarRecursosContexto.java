@@ -18,7 +18,7 @@ public class InicializarRecursosContexto implements ServletContextListener{
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		LOG.info("Inicializando Conexão SSH com base de dados da UTFPR.");
-		daoUTFPR = new DAOBaseUTFPR(false);
+		daoUTFPR = new DAOBaseUTFPR(true);
 		daoUTFPR.getConnectionFactory().openConnectionWithSSH();
 
 		LOG.info("Disponibilizando DAOBaseUTFPR no Contexto de Aplicação.");
