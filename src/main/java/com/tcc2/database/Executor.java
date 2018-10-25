@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +19,7 @@ import br.com.starmetal.results.ResultType;
 
 public class Executor {
 
+	private static final Logger LOG = Logger.getLogger(Executor.class.getName());
 	private Connection connection;
 
 	public Executor(Connection connection) {
@@ -39,11 +41,14 @@ public class Executor {
 		PreparedStatement statement = null;
 		ResultSet result = null;
 		JSONArray jsonArray;
+		String queryString = query.getQuery();
 		try {
-			statement = connection.prepareStatement(query.getQuery());
+			LOG.info("Status Query: [EXECUTANDO]");
+			LOG.info(queryString);
+			statement = connection.prepareStatement(queryString);
 			result = statement.executeQuery();
 			jsonArray = Executor.Parser.toJSON(result);
-
+			LOG.info("Status Query: [FINALIZADA]");
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
 
@@ -147,13 +152,13 @@ public class Executor {
 			PontosProximos pontoProximo = new PontosProximos();
 
 			pontoProximo.setNumeroPonto(result.getInt("numero_ponto"));
-			pontoProximo.setEndereco(result.getString("endereco"));
-			pontoProximo.setTipo(result.getString("tipo"));
+			pontoProximo.setEndereco(	result.getString("endereco"));
+			pontoProximo.setTipo(		result.getString("tipo"));
 			pontoProximo.setCodigoLinha(result.getInt("codigo_linha"));
-			pontoProximo.setNomeLinha(result.getString("nome_linha"));
-			pontoProximo.setCor(result.getString("cor"));
+			pontoProximo.setNomeLinha(	result.getString("nome_linha"));
+			pontoProximo.setCor(		result.getString("cor"));
 			pontoProximo.setApenasCartao(result.getString("apenas_cartao"));
-			pontoProximo.setGeojson(result.getString("geojson"));
+			pontoProximo.setGeojson(	result.getString("geojson"));
 
 			return pontoProximo;
 		}

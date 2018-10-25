@@ -151,7 +151,7 @@ public class DAORotas {
 	}
 	
 	//========================= FUNÇÕES AUXILIARES =========================
-	
+	// TODO revisão querySecundaria
 	public JSONArray procurarPonto(int numeroPonto) {
 		QueryMaker queryPrincipal = new QueryMaker();
 		queryPrincipal.select("numero_ponto", "endereco", "tipo, ST_AsGeoJSON(geom, 15, 0) as geojson")
@@ -161,39 +161,38 @@ public class DAORotas {
 		QueryMaker querySecundaria = new QueryMaker();
 		querySecundaria.select("A.tipo", "COUNT(A.tipo) as count_tipos", "B.peso")
 					   .from("crowdsourcing_pontos A, crowdsourcing_regras B")
-					   .where("A.tipo = B.tipo")
+					   .where("A.tipo = B.id")
 					   .where("A.numero_ponto", numeroPonto)
 					   .groupBy("A.tipo", "B.peso");
 		
 		JSONArray principal = executar.queryExecutor(queryPrincipal);
-//		TODO Corrigir problema em tabela crowdsourcing_regras
-//		JSONArray secundaria = executar.queryExecutor(querySecundaria);
+		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
-//		principal.getJSONObject(0).put("ocorrencias", secundaria);
+		principal.getJSONObject(0).put("ocorrencias", secundaria);
 		
 		return principal;
 	}
 	
+	// TODO revisão querySecundaria
 	public JSONArray procurarLinha(String codigoLinha) {
 		QueryMaker queryPrincipal = new QueryMaker();
 		queryPrincipal.select("codigo_linha", "nome_linha", "cor", "categoria", "apenas_cartao")
 					  .from("linhas_de_onibus")
 					  .where("codigo_linha", codigoLinha);
 		
-//		TODO Corrigir problema na tabela crowdsourcing_regras
-//		QueryMaker querySecundaria = new QueryMaker();
-//		querySecundaria.select("B.tipo", "COUNT(B.tipo) as count_tipos", "B.peso")
-//					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
-//					   .where("A.tipo = B.tipo")
-//					   .where("A.codigo_linha", codigoLinha)
-//					   .groupBy("B.tipo", "B.peso");
+		QueryMaker querySecundaria = new QueryMaker();
+		querySecundaria.select("B.id", "COUNT(B.id) as count_tipos", "B.peso")
+					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
+					   .where("A.tipo = B.id")
+					   .where("A.codigo_linha", codigoLinha)
+					   .groupBy("B.id", "B.peso");
 		
 		JSONArray principal = executar.queryExecutor(queryPrincipal);
-//		JSONArray secundaria = executar.queryExecutor(querySecundaria);
+		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
-//		principal.getJSONObject(0).put("ocorrencias", secundaria);
+		principal.getJSONObject(0).put("ocorrencias", secundaria);
 		
 		return principal;
 	}
