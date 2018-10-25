@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.tcc2.geral.Deploy;
 
 import br.com.starmetal.database.ConnectionFactoryWithSSH;
+import br.com.starmetal.database.PooledConnectionFactory;
 import br.com.starmetal.io.IOProperties;
 
 public class DAOBaseUTFPR {
@@ -28,11 +29,13 @@ public class DAOBaseUTFPR {
 		
 		if(PRODUCTION_MODE) {
 			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [PRODUCTION]");
-			factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
+			factory = new ConnectionFactoryWithSSH(new PooledConnectionFactory(),
+												   IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
 					   							   IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
 		} else {
 			Logger.getLogger(DAOBaseUTFPR.class.getName()).log(Level.INFO, "Modo de Operação Atual: [DEVELOPMENT]");
-			factory = new ConnectionFactoryWithSSH(IOProperties.getProperties(Deploy.WildFly.DB_CONFIG_FILE_PATH), 
+			factory = new ConnectionFactoryWithSSH(new PooledConnectionFactory(),
+												   IOProperties.getProperties(Deploy.WildFly.DB_CONFIG_FILE_PATH), 
 					   							   IOProperties.getProperties(Deploy.WildFly.SSH_CONFIG_FILE_PATH));	
 		}
 	}

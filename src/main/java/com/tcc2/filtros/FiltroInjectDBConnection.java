@@ -3,7 +3,6 @@ package com.tcc2.filtros;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -22,24 +21,26 @@ import br.com.starmetal.exceptions.DatabaseException;
 @WebFilter("/*")
 public class FiltroInjectDBConnection implements Filter{
 	
+	private static final Logger LOG = Logger.getLogger(FiltroInjectDBConnection.class.getName());
+	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		ServletContext context = request.getServletContext();
 		
 		//Recupera o recurso de contexto
+		LOG.info("Estabelecendo conexão com Base de Dados da UTFPR.");
 		DAOBaseUTFPR daoUTFPR = (DAOBaseUTFPR) context.getAttribute("daoUTFPR");
-		Logger.getLogger(FiltroInjectDBConnection.class.getName()).log(Level.INFO, "Estabelecendo conexão remota com Base de Dados da UTFPR.");
 		Connection conexaoBD = daoUTFPR.getConnectionFactory().getConnectionWithSSH();
 		
-		//Seta a conexão no contexto
-		Logger.getLogger(FiltroInjectDBConnection.class.getName()).log(Level.INFO, "Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
+		//Insere a conexão no contexto
+		LOG.info("Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
 		context.setAttribute("connection", conexaoBD);
 		
 		//Encaminha a execução para o resource de destino.
 		chain.doFilter(request, response);
 		
 		try {
-			Logger.getLogger(FiltroInjectDBConnection.class.getName()).log(Level.INFO, "Encerrando conexão remota com Base de Dados da UTFPR.");
+			LOG.info("Encerrando conexão com Base de Dados da UTFPR.");
 			conexaoBD.close();
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao encerrar conexão de banco de dados de contexto", sqle.getMessage());
@@ -47,14 +48,8 @@ public class FiltroInjectDBConnection implements Filter{
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void init(FilterConfig filterConfig) throws ServletException {}
 
 	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void destroy() {}
 }

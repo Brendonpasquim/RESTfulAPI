@@ -2,8 +2,8 @@ package com.tcc2.geral;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import parameters.LocalDateConverterProvider;
-import parameters.LocalTimeConverterProvider;
+import com.tcc2.parameters.LocalDateConverterProvider;
+import com.tcc2.parameters.LocalTimeConverterProvider;
 
 public class MyUrbResourceRegister extends ResourceConfig{
 

@@ -1,6 +1,5 @@
 package com.tcc2.geral;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -18,18 +17,18 @@ public class InicializarRecursosContexto implements ServletContextListener{
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		LOG.log(Level.INFO, "Inicializando CONTEXTO");
-		daoUTFPR = new DAOBaseUTFPR(true);
+		LOG.info("Inicializando Conexão SSH com base de dados da UTFPR.");
+		daoUTFPR = new DAOBaseUTFPR(false);
 		daoUTFPR.getConnectionFactory().openConnectionWithSSH();
-		
+
+		LOG.info("Disponibilizando DAOBaseUTFPR no Contexto de Aplicação.");
 		ServletContext context = sce.getServletContext();
-		LOG.log(Level.INFO, "Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
 		context.setAttribute("daoUTFPR", daoUTFPR);
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		LOG.log(Level.INFO, "Encerrando CONTEXTO");
+		LOG.info("Encerrando Conexão SSH com base de dados da UTFPR");
 		daoUTFPR.getConnectionFactory().closeConnectionWithSSH();
 	}
 	

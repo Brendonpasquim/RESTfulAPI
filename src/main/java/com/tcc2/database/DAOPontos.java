@@ -48,7 +48,7 @@ public class DAOPontos {
         	
         	ResultSet result = statement.executeQuery();
         	while(result.next()) {
-        		PontosProximos pontoDeOnibus = Parser.toPontoProximo(result);
+        		PontosProximos pontoDeOnibus = Executor.Parser.toPontoProximo(result);
         		listaDePontos.add(pontoDeOnibus);
         	}
         	

@@ -27,6 +27,7 @@ public class DAORotas {
 	 * @param longitudeDestino
 	 * @return
 	 */
+	@Deprecated
 	public JSONArray consultarRotaSimplesEntrePontosProximos(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
 		if(latitudeOrigem < 0 || longitudeOrigen < 0 || latitudeDestino < 0 || longitudeDestino < 0) {
 			String mensagemValidacao = "Parâmetros inválidos fornecidos no método 'consultarRotaSimplesEntrePontosProximos'. Valores fornecidos são: '%f' '%f' '%f' '%f'"; 
@@ -165,10 +166,11 @@ public class DAORotas {
 					   .groupBy("A.tipo", "B.peso");
 		
 		JSONArray principal = executar.queryExecutor(queryPrincipal);
-		JSONArray secundaria = executar.queryExecutor(querySecundaria);
+//		TODO Corrigir problema em tabela crowdsourcing_regras
+//		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
-		principal.getJSONObject(0).put("ocorrencias", secundaria);
+//		principal.getJSONObject(0).put("ocorrencias", secundaria);
 		
 		return principal;
 	}
@@ -179,18 +181,19 @@ public class DAORotas {
 					  .from("linhas_de_onibus")
 					  .where("codigo_linha", codigoLinha);
 		
-		QueryMaker querySecundaria = new QueryMaker();
-		querySecundaria.select("B.tipo", "COUNT(B.tipo) as count_tipos", "B.peso")
-					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
-					   .where("A.tipo = B.tipo")
-					   .where("A.codigo_linha", codigoLinha)
-					   .groupBy("B.tipo", "B.peso");
+//		TODO Corrigir problema na tabela crowdsourcing_regras
+//		QueryMaker querySecundaria = new QueryMaker();
+//		querySecundaria.select("B.tipo", "COUNT(B.tipo) as count_tipos", "B.peso")
+//					   .from("crowdsourcing_linhas A, crowdsourcing_regras B")
+//					   .where("A.tipo = B.tipo")
+//					   .where("A.codigo_linha", codigoLinha)
+//					   .groupBy("B.tipo", "B.peso");
 		
 		JSONArray principal = executar.queryExecutor(queryPrincipal);
-		JSONArray secundaria = executar.queryExecutor(querySecundaria);
+//		JSONArray secundaria = executar.queryExecutor(querySecundaria);
 		
 		//Acrescenta o resultado da segunda query ao JSON resultante da primeira query.
-		principal.getJSONObject(0).put("ocorrencias", secundaria);
+//		principal.getJSONObject(0).put("ocorrencias", secundaria);
 		
 		return principal;
 	}

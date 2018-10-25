@@ -110,8 +110,8 @@ public class TestesUnitarios {
 	}
 	
 	public static void main(String[] args) {
-//		TestesUnitarios.TesteIO();
-//		TestesUnitarios.TesteSSH();
+		TestesUnitarios.TesteIO();
+		TestesUnitarios.TesteSSH();
 //		TestesUnitarios.TesteSSH2();
 		TestesUnitarios.TesteQueryMaker();
 	}
