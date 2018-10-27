@@ -20,7 +20,7 @@ import br.com.starmetal.results.ResultType;
 public class Executor {
 
 	private static final Logger LOG = Logger.getLogger(Executor.class.getName());
-	private Connection connection;
+	private final Connection connection;
 
 	public Executor(Connection connection) {
 		this.connection = connection;
@@ -30,7 +30,6 @@ public class Executor {
 	 * Executa uma consulta na base de dados.
 	 * 
 	 * @param query
-	 * @param connection
 	 * @return
 	 */
 	public JSONArray queryExecutor(final QueryMaker query) {
@@ -38,37 +37,25 @@ public class Executor {
 			return new JSONArray();
 		}
 
-		PreparedStatement statement = null;
-		ResultSet result = null;
 		JSONArray jsonArray;
 		String queryString = query.getQuery();
-		try {
+		try(
+			PreparedStatement statement = connection.prepareStatement(queryString);
+			ResultSet result = statement.executeQuery()
+			){
+			
 			LOG.info("Status Query: [EXECUTANDO]");
 			LOG.info(queryString);
-			statement = connection.prepareStatement(queryString);
-			result = statement.executeQuery();
 			jsonArray = Executor.Parser.toJSON(result);
 			LOG.info("Status Query: [FINALIZADA]");
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
 
-		} finally {
-			try {
-
-				if (statement != null)
-					statement.close();
-				if (result != null)
-					result.close();
-
-			} catch (SQLException sqle) {
-				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.",
-						sqle.getMessage());
-			}
 		}
 
 		return jsonArray;
-	}
-
+	}	
+	
 	/**
 	 * Executa uma inserção na base de dados.
 	 * 
@@ -80,27 +67,16 @@ public class Executor {
 			return ResultType.ERROR;
 		}
 
-		PreparedStatement statement = null;
-		try {
-			statement = this.connection.prepareStatement(insert.getInsert());
+		try(PreparedStatement statement = this.connection.prepareStatement(insert.getInsert())){
 			statement.executeUpdate();
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Problema ao executar insert na tabela 'relatorio_viagem'.", sqle);
-		} finally {
-			try {
-
-				if (statement != null)
-					statement.close();
-
-			} catch (SQLException sqle) {
-				throw new DatabaseException("Falha ao encerrar recursos de conexão com base de dados.",
-						sqle.getMessage());
-			}
-		}
-
+		} 
+		
 		return ResultType.SUCESS;
 	}
-
+	
+	
 	public static class Parser {
 
 		/**
