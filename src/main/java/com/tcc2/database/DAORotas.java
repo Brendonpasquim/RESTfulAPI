@@ -14,7 +14,7 @@ public class DAORotas {
 	
 	public DAORotas(DAOManager manager) {
 		this.daoPontos = manager.getDAOPontos(); 
-		this.executar = manager.getQueryExecutor();
+		this.executar = manager.getExecutor();
 	}
 	
 	/**

@@ -9,16 +9,16 @@ public class DAOManager {
 	private DAORotas daoRotas = null;
 	private DAOPontos daoPontos = null;
 	private DAOCrowdsourcing daoCrowdsourcing = null;
-	private Executor queryExecutor;
+	private Executor executor;
 	
 	public DAOManager(Connection connection) {
 		this.connection = connection;
-		this.queryExecutor = new Executor(connection);
+		this.executor = new Executor(connection);
 	}
 	
 	public DAOManager(ServletContext context) {
 		this.connection = (Connection) context.getAttribute("connection");
-		this.queryExecutor = new Executor(this.connection);
+		this.executor = new Executor(this.connection);
 	}
 	
 	public DAORotas getDAORotas() {
@@ -49,7 +49,7 @@ public class DAOManager {
 		return connection;
 	}
 	
-	public Executor getQueryExecutor() {
-		return queryExecutor;
+	public Executor getExecutor() {
+		return executor;
 	}
 }

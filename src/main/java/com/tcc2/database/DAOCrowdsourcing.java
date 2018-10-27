@@ -12,7 +12,7 @@ public class DAOCrowdsourcing {
 	private Executor executar = null;
 	
 	public DAOCrowdsourcing(DAOManager daoManager) {
-		this.executar = daoManager.getQueryExecutor();
+		this.executar = daoManager.getExecutor();
 	}
 	
 	public ResultType cadastrarRelatorioViagem(LocalDate data, LocalTime horarioSaida, int pontoSaida, LocalTime horarioChegada, int pontoChegada, String codigoLinha) {

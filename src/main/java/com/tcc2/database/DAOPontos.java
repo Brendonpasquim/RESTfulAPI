@@ -22,7 +22,7 @@ public class DAOPontos {
 
     public DAOPontos(DAOManager manager){
         this.connection = manager.getConnection();
-        this.executar = manager.getQueryExecutor();
+        this.executar = manager.getExecutor();
     }
     
     /**
