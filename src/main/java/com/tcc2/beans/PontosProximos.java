@@ -9,7 +9,7 @@ public class PontosProximos {
 	private String endereco;
 	private String tipo;
 	@JsonbProperty("codigo_linha")
-	private int codigoLinha;
+	private String codigoLinha;
 	private double latitude;
 	private double longitude;
 	@JsonbProperty("nome_linha")
@@ -46,11 +46,11 @@ public class PontosProximos {
 		this.tipo = tipo;
 	}
 
-	public int getCodigoLinha() {
+	public String getCodigoLinha() {
 		return codigoLinha;
 	}
 
-	public void setCodigoLinha(int codigoLinha) {
+	public void setCodigoLinha(String codigoLinha) {
 		this.codigoLinha = codigoLinha;
 	}
 

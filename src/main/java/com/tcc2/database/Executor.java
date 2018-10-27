@@ -154,7 +154,7 @@ public class Executor {
 			pontoProximo.setNumeroPonto(result.getInt("numero_ponto"));
 			pontoProximo.setEndereco(	result.getString("endereco"));
 			pontoProximo.setTipo(		result.getString("tipo"));
-			pontoProximo.setCodigoLinha(result.getInt("codigo_linha"));
+			pontoProximo.setCodigoLinha(result.getString("codigo_linha"));
 			pontoProximo.setNomeLinha(	result.getString("nome_linha"));
 			pontoProximo.setCor(		result.getString("cor"));
 			pontoProximo.setApenasCartao(result.getString("apenas_cartao"));
