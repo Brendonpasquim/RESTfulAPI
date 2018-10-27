@@ -28,7 +28,7 @@ public class WSRotas {
 	@Path("rota_simples")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String consultarRotaSimples(@NotNull @QueryParam("latitude_origem")   double latitudeOrigem,
-									   @NotNull @QueryParam("longitude_origen")  double longitudeOrigen,
+									   @NotNull @QueryParam("longitude_origem")  double longitudeOrigen,
 									   @NotNull @QueryParam("latitude_destino")  double latitudeDestino,
 									   @NotNull @QueryParam("longitude_destino") double longitudeDestino) {
 		

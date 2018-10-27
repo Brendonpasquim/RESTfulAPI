@@ -29,12 +29,6 @@ public class DAORotas {
 	 */
 	@Deprecated
 	public JSONArray consultarRotaSimplesEntrePontosProximos(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
-		if(latitudeOrigem < 0 || longitudeOrigen < 0 || latitudeDestino < 0 || longitudeDestino < 0) {
-			String mensagemValidacao = "Parâmetros inválidos fornecidos no método 'consultarRotaSimplesEntrePontosProximos'. Valores fornecidos são: '%f' '%f' '%f' '%f'"; 
-			LOG.warning(String.format(mensagemValidacao, latitudeOrigem, longitudeOrigen, latitudeDestino, longitudeDestino));
-			return new JSONArray();
-		}
-		
 		JSONArray listaPontosProximosOrigem = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeOrigem, longitudeOrigen);
 		JSONArray listaPontosProximosDestino = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeDestino, longitudeDestino);
 		
