@@ -120,7 +120,7 @@
 		    <version>0.9.5.2</version>
 		</dependency>
         
-        <!-- Essa dependência é necessária apenas no ambiente de Produção. Comentar quando em Desenvolvimento  
+        <!-- Essa dependência é necessária apenas no ambiente de Produção. Comentar quando em Desenvolvimento -->
         <dependency>
 		    <groupId>starmetal</groupId>
 		    <artifactId>com.tcc2.starmetal</artifactId>
@@ -130,7 +130,7 @@
 		        /opt/app-root/src/src/main/webapp/WEB-INF/lib/starmetal.jar
 		    </systemPath>
 		</dependency>
-		-->
+		
 	</dependencies>
 
 
