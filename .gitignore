@@ -4,5 +4,4 @@
 # Log file
 #*.log
 
-pom.xml
-src/main/java/com/tcc2/geral/InicializarRecursosContexto.java
+.settings/
