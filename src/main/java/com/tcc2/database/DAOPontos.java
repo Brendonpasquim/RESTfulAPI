@@ -43,18 +43,14 @@ public class DAOPontos {
     		.setParameter("latitude", latitude);
     	
     	List<PontosProximos> listaDePontos = new ArrayList<>();
-    	try {
-        	PreparedStatement statement = connection.prepareStatement(query.getQuery());
+    	try(PreparedStatement statement = connection.prepareStatement(query.getQuery())) {
         	
-        	ResultSet result = statement.executeQuery();
-        	while(result.next()) {
-        		PontosProximos pontoDeOnibus = Executor.Parser.toPontoProximo(result);
-        		listaDePontos.add(pontoDeOnibus);
-        	}
-        	
-        	result.close();
-        	statement.close();
-        	
+        	try(ResultSet result = statement.executeQuery()){
+		    	while(result.next()) {
+		    		PontosProximos pontoDeOnibus = Executor.Parser.toPontoProximo(result);
+		    		listaDePontos.add(pontoDeOnibus);
+		    	}
+    		}
     	} catch(SQLException sqle) {
     		throw new DatabaseException("Falha ao executar consulta por Pontos de Ônibus próximos", sqle.getMessage());
     	}

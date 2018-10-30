@@ -2,7 +2,6 @@ package com.tcc2.testes;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -28,25 +27,23 @@ public class TestesUnitarios {
 	}
 	
 	private static void TesteSSH() {
-		SSHConnector ssh = new SSHConnector();
-        ssh.setUsername("posttunnel1");
-        ssh.setPassword("Gr@ngotts");
-        ssh.setRemoteHost("200.134.10.21");
-        ssh.setLocalHost("localhost");
-        ssh.setSSHPort(22);
-        ssh.setLocalHostPort(5434);
-        ssh.setRemoteHostPort(5432);
-        
-        try {
+		
+        try(SSHConnector ssh = new SSHConnector()) {
+            ssh.setUsername("posttunnel1");
+            ssh.setPassword("Gr@ngotts");
+            ssh.setRemoteHost("200.134.10.21");
+            ssh.setLocalHost("localhost");
+            ssh.setSSHPort(22);
+            ssh.setLocalHostPort(5434);
+            ssh.setRemoteHostPort(5432);
         	ssh.connect();
-        	
-        	ConnectionFactory factory = new ConnectionFactory();
         	
         	String dbName = "BIGSEA";
             String dbUser = "postread";
             String dbPassword = "PostRead";
             String url = "jdbc:postgresql://" + ssh.getLocalHost() + ":" + ssh.getRemoteHostPort() + "/" + dbName;
             
+            ConnectionFactory factory = new ConnectionFactory();
             Connection connection = factory.getConnection(url, dbUser, dbPassword);
             
             System.out.println("Criando query...");
@@ -61,7 +58,7 @@ public class TestesUnitarios {
             System.out.println("Conexão BD encerrada...");
             ssh.disconnect();
             System.out.println("Conexão SSH encerrada...");
-        } catch(SQLException sql ) {
+        } catch(Exception sql ) {
         	sql.printStackTrace();
         }
 	}

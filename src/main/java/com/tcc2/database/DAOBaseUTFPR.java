@@ -1,5 +1,6 @@
 package com.tcc2.database;
 
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.tcc2.geral.Deploy;
@@ -19,19 +20,21 @@ public class DAOBaseUTFPR {
 	private static final Logger LOG = Logger.getLogger(DAOBaseUTFPR.class.getName());
 	
 	public DAOBaseUTFPR(final boolean PRODUCTION_MODE) {
-		PooledConnectionFactory pool = new PooledConnectionFactory(1, 3, 3, 20, 300, 240);
-		
+
+		Properties dbPropertie;
+		Properties sshPropertie;
+				
 		if(PRODUCTION_MODE) {
 			LOG.info("Modo de Operação Atual: [PRODUCTION]");
-			factory = new ConnectionFactoryWithSSH(pool,
-												   IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties"), 
-					   							   IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties"));
+			dbPropertie  = IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/db.properties");
+			sshPropertie = IOProperties.getProperties(System.getenv("HOME") + "/src/main/webapp/WEB-INF/properties/ssh.properties");
 		} else {
 			LOG.info("Modo de Operação Atual: [DEVELOPMENT]");
-			factory = new ConnectionFactoryWithSSH(pool,
-												   IOProperties.getProperties(Deploy.WildFly.DB_CONFIG_FILE_PATH), 
-					   							   IOProperties.getProperties(Deploy.WildFly.SSH_CONFIG_FILE_PATH));	
+			dbPropertie  = IOProperties.getProperties(Deploy.WildFly.DB_CONFIG_FILE_PATH);
+			sshPropertie = IOProperties.getProperties(Deploy.WildFly.SSH_CONFIG_FILE_PATH);
 		}
+		
+		factory = new ConnectionFactoryWithSSH(new PooledConnectionFactory(dbPropertie), dbPropertie, sshPropertie);
 	}
 	
 	public ConnectionFactoryWithSSH getConnectionFactory() {

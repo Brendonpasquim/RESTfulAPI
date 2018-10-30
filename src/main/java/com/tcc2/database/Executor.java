@@ -36,7 +36,7 @@ public class Executor {
 		if (query == null) {
 			return new JSONArray();
 		}
-
+		
 		JSONArray jsonArray;
 		String queryString = query.getQuery();
 		try(PreparedStatement statement = connection.prepareStatement(queryString)){

@@ -27,7 +27,6 @@ public class DAORotas {
 	 * @param longitudeDestino
 	 * @return
 	 */
-	@Deprecated
 	public JSONArray consultarRotaSimplesEntrePontosProximos(double latitudeOrigem, double longitudeOrigen, double latitudeDestino, double longitudeDestino) {
 		JSONArray listaPontosProximosOrigem = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeOrigem, longitudeOrigen);
 		JSONArray listaPontosProximosDestino = daoPontos.consultarPontosDeOnibusProximosSimplificado(latitudeDestino, longitudeDestino);
