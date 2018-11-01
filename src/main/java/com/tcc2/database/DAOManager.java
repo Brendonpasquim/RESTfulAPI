@@ -2,8 +2,6 @@ package com.tcc2.database;
 
 import java.sql.Connection;
 
-import javax.servlet.ServletContext;
-
 public class DAOManager {
 	private Connection connection = null;
 	private DAORotas daoRotas = null;
@@ -14,11 +12,6 @@ public class DAOManager {
 	public DAOManager(Connection connection) {
 		this.connection = connection;
 		this.executor = new Executor(connection);
-	}
-	
-	public DAOManager(ServletContext context) {
-		this.connection = (Connection) context.getAttribute("connection");
-		this.executor = new Executor(this.connection);
 	}
 	
 	public DAORotas getDAORotas() {

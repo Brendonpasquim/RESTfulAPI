@@ -29,11 +29,10 @@ public class FiltroInjectDBConnection implements Filter{
 		DAOBaseUTFPR daoUTFPR = (DAOBaseUTFPR) context.getAttribute("daoUTFPR");
 
 		LOG.info("Estabelecendo conexão com Base de Dados da UTFPR.");
-		try(Connection conexaoBD = daoUTFPR.getConnectionFactory().getConnectionWithSSH()) {
-			LOG.info("[CONNECTION STATUS]: " + conexaoBD.isValid(0));
+		try(Connection conexaoBD = daoUTFPR.getConnectionFactory().getConnectionWithSSH()) {			
 			//Insere a conexão no contexto
 			LOG.info("Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
-			context.setAttribute("connection", conexaoBD);
+			request.setAttribute("connection", conexaoBD);
 			
 			//Encaminha a execução para o resource de destino.
 			chain.doFilter(request, response);

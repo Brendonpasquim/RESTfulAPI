@@ -1,7 +1,9 @@
 package com.tcc2.geral;
 
+import java.sql.Connection;
+
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -10,16 +12,17 @@ import com.tcc2.database.DAOManager;
 
 public class DAOManagerFactory implements Factory<DAOManager>{
 
-	private ServletContext context;
+	private HttpServletRequest request;
 	
 	@Inject
-	public DAOManagerFactory(ServletContext context) {
-		this.context = context;
+	public DAOManagerFactory(HttpServletRequest request) {
+		this.request = request;
 	}
 	
 	@Override
 	public DAOManager provide() {
-		return new DAOManager(this.context);
+		Connection connection = (Connection) request.getAttribute("connection");
+		return new DAOManager(connection);
 	}
 
 	@Override
