@@ -30,6 +30,7 @@ public class FiltroInjectDBConnection implements Filter{
 
 		LOG.info("Estabelecendo conexão com Base de Dados da UTFPR.");
 		try(Connection conexaoBD = daoUTFPR.getConnectionFactory().getConnectionWithSSH()) {
+			LOG.info("[CONNECTION STATUS]: " + conexaoBD.isValid(0));
 			//Insere a conexão no contexto
 			LOG.info("Disponibilizando conexão com Base de Dados no Contexto de Aplicação.");
 			context.setAttribute("connection", conexaoBD);
