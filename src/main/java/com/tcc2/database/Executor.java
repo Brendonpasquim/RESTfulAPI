@@ -39,13 +39,12 @@ public class Executor {
 		
 		JSONArray jsonArray;
 		String queryString = query.getQuery();
-		try(PreparedStatement statement = connection.prepareStatement(queryString)){
-			try(ResultSet result = statement.executeQuery()) {
+		try(PreparedStatement statement = connection.prepareStatement(queryString);
+			ResultSet result = statement.executeQuery()){
 //				LOG.info("Status Query: [EXECUTANDO]");
 //				LOG.info(queryString);
 				jsonArray = Executor.Parser.toJSON(result);
 //				LOG.info("Status Query: [FINALIZADA]");
-			}
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
 		}
