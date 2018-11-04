@@ -20,7 +20,7 @@ import com.tcc2.database.DAOManager;
 public class WSPontos {
 	
 	@Context
-	DAOManager manager;
+	private DAOManager manager;
 	
     @GET
     @Produces(MediaType.TEXT_PLAIN)

@@ -16,7 +16,7 @@ import com.tcc2.database.DAOManager;
 public class WSRotas {
 
 	@Context
-	DAOManager manager;
+	private DAOManager manager;
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)

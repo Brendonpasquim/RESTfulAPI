@@ -22,21 +22,20 @@ import br.com.starmetal.results.ResultType;
 public class WSCrowdsourcing {
 
 	@Context
-	DAOManager manager;
+	private DAOManager manager;
 	
 	@POST
 	@Path("cadastrar_relatorio_viagem")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cadastrarRelatorioViagem(@NotNull @FormParam("data_viagem") 	LocalDate dataViagem,
-											 @NotNull @FormParam("horario_saida") 	LocalTime horarioSaida,
-											 @NotNull @FormParam("ponto_saida") 	int pontoSaida,
 											 @NotNull @FormParam("horario_chegada") LocalTime horarioChegada,
+											 @NotNull @FormParam("horario_saida") 	LocalTime horarioSaida,
 											 @NotNull @FormParam("ponto_chegada") 	int pontoChegada,
+											 @NotNull @FormParam("ponto_saida") 	int pontoSaida,
 											 @NotNull @FormParam("codigo_linha") 	String codigoLinha) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarRelatorioViagem(dataViagem, horarioSaida, pontoSaida, horarioChegada, pontoChegada, codigoLinha);
-
 		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();
 	}
 
@@ -45,13 +44,12 @@ public class WSCrowdsourcing {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cadastrarCrowdsourcingPontos(@NotNull @FormParam("nivel") 		 int nivel,
+												 @NotNull @FormParam("tipo") 		 int tipo,
 												 @NotNull @FormParam("numero_ponto") int numeroPonto,
 												 @NotNull @FormParam("dia") 		 LocalDate dia,
-												 @NotNull @FormParam("horario") 	 LocalTime horario,
-												 @NotNull @FormParam("tipo") 		 int tipo ) {
+												 @NotNull @FormParam("horario") 	 LocalTime horario) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingPontos(nivel, numeroPonto, dia, horario, tipo);
-		
 		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();  
 	}
 	
@@ -60,15 +58,14 @@ public class WSCrowdsourcing {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cadastrarCrowdsourcingLinhas(@NotNull @FormParam("nivel") 		 int nivel,
+												 @NotNull @FormParam("tipo") 		 int tipo,
 												 @NotNull @FormParam("codigo_linha") String codigoLinha,
 												 @NotNull @FormParam("dia") 		 LocalDate dia,
 												 @NotNull @FormParam("horario") 	 LocalTime horario,
 												 @NotNull @FormParam("lat") 		 double latitude,
-												 @NotNull @FormParam("lon") 		 double longitude,
-												 @NotNull @FormParam("tipo") 		 int tipo) {
+												 @NotNull @FormParam("lon") 		 double longitude) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingLinhas(nivel, codigoLinha, dia, horario, latitude, longitude, tipo);
-		
 		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();
 	}
 	

@@ -7,6 +7,7 @@ public class DAOManager {
 	private DAORotas daoRotas = null;
 	private DAOPontos daoPontos = null;
 	private DAOCrowdsourcing daoCrowdsourcing = null;
+	private DAOPortal daoPortal = null;
 	private Executor executor;
 	
 	public DAOManager(Connection connection) {
@@ -36,6 +37,14 @@ public class DAOManager {
 		}
 		
 		return this.daoCrowdsourcing;
+	}
+	
+	public DAOPortal getDAOPortal() {
+		if(this.daoPortal == null) {
+			return this.daoPortal = new DAOPortal(this);
+		}
+		
+		return this.daoPortal;
 	}
 	
 	public Connection getConnection() {

@@ -10,25 +10,27 @@ import java.net.URL;
 public class TestesConcorrencia {
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 100; i++) {
-			new Thread(new ThreadConsulta(i + 1)).start();
+		for (int i = 0; i < 50; i++) {
+			new Thread(new ThreadConsulta(i + 1)).start();			
 		}
 	}
 }
 
 class ThreadConsulta implements Runnable {
+
 	private static int HTTP_COD_SUCESSO = 200;
 	private int THREAD_ID = 0;
 
 	public ThreadConsulta(int THREAD_ID) {
 		this.THREAD_ID = THREAD_ID;
 	}
-	
+
 	@Override
 	public void run() {
-		try {			
+		try {
 			System.out.println(String.format("Requisição [%d] INICIADA", ++THREAD_ID));
-			URL url = new URL("http://localhost:8080/restfulapi/rotas/rota_simples_dois_pontos?numero_ponto_origem=150009&numero_ponto_destino=110026");
+			URL url = new URL(
+					"http://myurb-myurb.a3c1.starter-us-west-1.openshiftapps.com/restfulapi/rotas/rota_simples_dois_pontos?numero_ponto_origem=150009&numero_ponto_destino=110026");
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			if (con.getResponseCode() != HTTP_COD_SUCESSO) {

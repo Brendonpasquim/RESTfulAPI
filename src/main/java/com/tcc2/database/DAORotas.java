@@ -123,7 +123,7 @@ public class DAORotas {
 			 .from("relatorio_viagem R, pontos_de_onibus P, linhas_de_onibus L, divisa_de_bairros B")
 			 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
 			 .where("R.codigo_linha = L.codigo_linha")
-			 .where("R.numero_ponto = P.numero_ponto");
+			 .where("R.ponto_saida = P.numero_ponto");
 		
 		return executar.queryExecutor(query);
 	}
@@ -138,7 +138,7 @@ public class DAORotas {
 			 .from("relatorio_viagem R, pontos_de_onibus P, linhas_de_onibus L, divisa_de_bairros B")
 			 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
 			 .where("R.codigo_linha = L.codigo_linha")
-			 .where("R.numero_ponto = P.numero_ponto");
+			 .where("R.ponto_chegada = P.numero_ponto");
 		
 		return executar.queryExecutor(query);
 	}
