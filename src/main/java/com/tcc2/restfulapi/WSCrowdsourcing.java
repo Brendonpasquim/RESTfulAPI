@@ -43,13 +43,12 @@ public class WSCrowdsourcing {
 	@Path("cadastrar_crowdsourcing_pontos")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response cadastrarCrowdsourcingPontos(@NotNull @FormParam("nivel") 		 int nivel,
-												 @NotNull @FormParam("tipo") 		 int tipo,
+	public Response cadastrarCrowdsourcingPontos(@NotNull @FormParam("tipo") 		 int tipo,
 												 @NotNull @FormParam("numero_ponto") int numeroPonto,
 												 @NotNull @FormParam("dia") 		 LocalDate dia,
 												 @NotNull @FormParam("horario") 	 LocalTime horario) {
 		
-		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingPontos(nivel, numeroPonto, dia, horario, tipo);
+		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingPontos(numeroPonto, dia, horario, tipo);
 		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();  
 	}
 	
@@ -57,15 +56,14 @@ public class WSCrowdsourcing {
 	@Path("cadastrar_crowdsourcing_linhas")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response cadastrarCrowdsourcingLinhas(@NotNull @FormParam("nivel") 		 int nivel,
-												 @NotNull @FormParam("tipo") 		 int tipo,
+	public Response cadastrarCrowdsourcingLinhas(@NotNull @FormParam("tipo") 		 int tipo,
 												 @NotNull @FormParam("codigo_linha") String codigoLinha,
 												 @NotNull @FormParam("dia") 		 LocalDate dia,
 												 @NotNull @FormParam("horario") 	 LocalTime horario,
 												 @NotNull @FormParam("lat") 		 double latitude,
 												 @NotNull @FormParam("lon") 		 double longitude) {
 		
-		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingLinhas(nivel, codigoLinha, dia, horario, latitude, longitude, tipo);
+		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingLinhas(codigoLinha, dia, horario, latitude, longitude, tipo);
 		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();
 	}
 	

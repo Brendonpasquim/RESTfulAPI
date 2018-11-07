@@ -16,7 +16,7 @@ public class DAOCrowdsourcing {
 	}
 	
 	public ResultType cadastrarRelatorioViagem(LocalDate data, LocalTime horarioSaida, int pontoSaida, LocalTime horarioChegada, int pontoChegada, String codigoLinha) {
-		if(data == null || horarioSaida == null || horarioChegada == null || Validacao.ehStringVazia(codigoLinha)) {
+		if(Validacao.saoParametrosInvalidos(data, horarioSaida, horarioChegada, codigoLinha)) {
 			return ResultType.ERROR;
 		}
 		
@@ -32,14 +32,13 @@ public class DAOCrowdsourcing {
 		return executar.insertExecutor(insert);
 	}
 	
-	public ResultType cadastrarCrowdsourcingPontos(int nivel, int numeroPonto, LocalDate dia, LocalTime horario, int tipo) {
-		if(dia == null || horario == null) {
+	public ResultType cadastrarCrowdsourcingPontos(int numeroPonto, LocalDate dia, LocalTime horario, int tipo) {
+		if(Validacao.saoParametrosInvalidos(dia, horario)) {
 			return ResultType.ERROR;
 		}
 		
 		InsertMaker insert = new InsertMaker();
 		insert.insertInto("crowdsourcing_pontos")
-			  .value("nivel", nivel)
 			  .value("numero_ponto", numeroPonto)
 			  .value("dia", dia)
 			  .value("horario", horario)
@@ -48,14 +47,13 @@ public class DAOCrowdsourcing {
 		return executar.insertExecutor(insert);
 	}
 	
-	public ResultType cadastrarCrowdsourcingLinhas(int nivel, String codigoLinha, LocalDate dia, LocalTime horario, double latitude, double longitude, int tipo) {
-		if(Validacao.ehStringVazia(codigoLinha) || dia == null || horario == null) {
+	public ResultType cadastrarCrowdsourcingLinhas(String codigoLinha, LocalDate dia, LocalTime horario, double latitude, double longitude, int tipo) {
+		if(Validacao.saoParametrosInvalidos(codigoLinha, dia, horario)) {
 			return ResultType.ERROR;
 		}
 		
 		InsertMaker insert = new InsertMaker();
 		insert.insertInto("crowdsourcing_linhas")
-			  .value("nivel", nivel)
 			  .value("codigo_linha", codigoLinha)
 			  .value("dia", dia)
 			  .value("horario", horario)

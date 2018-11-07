@@ -66,7 +66,7 @@ public class Executor {
 		try(PreparedStatement statement = this.connection.prepareStatement(insert.getInsert())){
 			statement.executeUpdate();
 		} catch (SQLException sqle) {
-			throw new DatabaseException("Problema ao executar insert na tabela 'relatorio_viagem'.", sqle);
+			throw new DatabaseException("Falha ao executar inserção na base de Dados da UTFPR.", sqle);
 		} 
 		
 		return ResultType.SUCESS;
