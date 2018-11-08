@@ -129,7 +129,7 @@ public class DAOPortal {
         QueryMaker queryWith = new QueryMaker();
         queryWith.select("DISTINCT C.numero_ponto", "P.endereco", "P.tipo", "R.nome", "C.dia", "C.horario", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
                  .from("crowdsourcing_pontos C, pontos_de_onibus P, crowdsourcing_regras R")
-                 .where("P.tipo = R.id")
+                 .where("C.tipo = R.id")
                  .where("P.numero_ponto = C.numero_ponto");
                  
         QueryMaker query = new QueryMaker();

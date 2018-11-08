@@ -36,22 +36,23 @@ public class Executor {
 		if (query == null) {
 			return new JSONArray();
 		}
-		
+
 		JSONArray jsonArray;
 		String queryString = query.getQuery();
-		try(PreparedStatement statement = connection.prepareStatement(queryString);
-			ResultSet result = statement.executeQuery()){
-				LOG.info("Status Query: [EXECUTANDO]");
-				LOG.info(queryString);
-				jsonArray = Executor.Parser.toJSON(result);
-				LOG.info("Status Query: [FINALIZADA]");
+		try (PreparedStatement statement = connection.prepareStatement(queryString);
+			 ResultSet result = statement.executeQuery()) {
+			
+			LOG.info("Status Query: [EXECUTANDO]");
+			LOG.info(queryString);
+			jsonArray = Executor.Parser.toJSON(result);
+			LOG.info("Status Query: [FINALIZADA]");
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao executar consulta na base de Dados da UTFPR.", sqle.getMessage());
 		}
 
 		return jsonArray;
-	}	
-	
+	}
+
 	/**
 	 * Executa uma inserção na base de dados.
 	 * 
@@ -63,16 +64,19 @@ public class Executor {
 			return ResultType.ERROR;
 		}
 
-		try(PreparedStatement statement = this.connection.prepareStatement(insert.getInsert())){
+		String insertString = insert.getInsert();
+		try (PreparedStatement statement = this.connection.prepareStatement(insertString)) {
+			LOG.info("Status Insert: [EXECUTANDO]");
+			LOG.info(insertString);
 			statement.executeUpdate();
+			LOG.info("Status Query: [FINALIZADO]");
 		} catch (SQLException sqle) {
 			throw new DatabaseException("Falha ao executar inserção na base de Dados da UTFPR.", sqle);
-		} 
-		
+		}
+
 		return ResultType.SUCESS;
 	}
-	
-	
+
 	public static class Parser {
 
 		/**
@@ -123,14 +127,14 @@ public class Executor {
 
 			PontosProximos pontoProximo = new PontosProximos();
 
-			pontoProximo.setNumeroPonto(result.getInt("numero_ponto"));
-			pontoProximo.setEndereco(	result.getString("endereco"));
-			pontoProximo.setTipo(		result.getString("tipo"));
-			pontoProximo.setCodigoLinha(result.getString("codigo_linha"));
-			pontoProximo.setNomeLinha(	result.getString("nome_linha"));
-			pontoProximo.setCor(		result.getString("cor"));
+			pontoProximo.setNumeroPonto( result.getInt("numero_ponto"));
+			pontoProximo.setEndereco(	 result.getString("endereco"));
+			pontoProximo.setTipo(		 result.getString("tipo"));
+			pontoProximo.setCodigoLinha( result.getString("codigo_linha"));
+			pontoProximo.setNomeLinha(	 result.getString("nome_linha"));
+			pontoProximo.setCor(		 result.getString("cor"));
 			pontoProximo.setApenasCartao(result.getString("apenas_cartao"));
-			pontoProximo.setGeojson(	result.getString("geojson"));
+			pontoProximo.setGeojson(	 result.getString("geojson"));
 
 			return pontoProximo;
 		}
