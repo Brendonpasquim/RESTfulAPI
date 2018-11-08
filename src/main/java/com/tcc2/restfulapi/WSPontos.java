@@ -51,9 +51,9 @@ public class WSPontos {
 	@GET
 	@Path("pontos")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarPontos() {
+	public String consultarPontos(@QueryParam("bairro") String bairro) {
 		
-		JSONArray pontos = manager.getDAOPontos().consultarPontosDeOnibus();
+		JSONArray pontos = manager.getDAOPontos().consultarPontosDeOnibus(bairro);
 		return pontos.toString();
 	}
 	
@@ -116,18 +116,18 @@ public class WSPontos {
 	@GET
 	@Path("problemas_onibus")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarProblemasOnibus() {
+	public String consultarProblemasOnibus(@QueryParam("bairro") String bairro) {
 		
-		JSONArray problemasOnibus = manager.getDAOPontos().consultarProblemasOnibusCrowdsourcing();
+		JSONArray problemasOnibus = manager.getDAOPontos().consultarProblemasOnibusCrowdsourcing(bairro);
 		return problemasOnibus.toString();
 	}
 	
 	@GET
 	@Path("problemas_linhas")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarProblemasLinhas() {
+	public String consultarProblemasLinhas(@QueryParam("bairro") String bairro) {
 
-		JSONArray problemasLinhas = manager.getDAOPontos().consultarProblemasLinhasCrowdsourcing();
+		JSONArray problemasLinhas = manager.getDAOPontos().consultarProblemasLinhasCrowdsourcing(bairro);
 		return problemasLinhas.toString();
 	}
 }

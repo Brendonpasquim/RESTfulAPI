@@ -7,7 +7,6 @@ import org.json.JSONArray;
 
 import br.com.starmetal.database.postgresql.QueryMaker;
 import br.com.starmetal.util.FiltersUtil;
-import br.com.starmetal.validacoes.Validacao;
 
 /**
  *
@@ -19,25 +18,6 @@ public class DAOPortal {
 
     public DAOPortal(DAOManager daoManager) {
         this.executar = daoManager.getExecutor();
-    }
-    
-    private QueryMaker adicionarFiltroBairro(QueryMaker query, String bairro) {
-    	if(Validacao.saoParametrosInvalidos(query, bairro)) {
-    		return query;
-    	}
-    	
-    	String where = "ST_Within(P.geom, ST_Transform(ST_setSRID((SELECT geom FROM divisa_de_bairros WHERE nome ilike ':bairro'), 29192), 4326))";
-    	
-    	QueryMaker tabelaAuxBairro = new QueryMaker();
-    	tabelaAuxBairro.select("DISTINCT *")
-    				   .from("pontos_de_onibus P")
-    				   .where(where).setParameter("bairro", bairro);
-    	
-    	query.with(tabelaAuxBairro, "tabela_pontos")
-    		 .from("tabela_aux aux, tabela_pontos pontos")
-    		 .where("aux.numero_ponto = pontos.numero_ponto");
-  	
-    	return query;
     }
     
     public JSONArray consultarMapaOrigem(LocalDate diaInicio, LocalDate diaFim, LocalTime horaInicio, LocalTime horaFim, String bairro){
@@ -55,8 +35,7 @@ public class DAOPortal {
              .groupBy("ponto_saida", "aux.endereco", "aux.tipo", "aux.codigo_linha", "geojson")
              .orderBy("ponto_saida");
         
-        adicionarFiltroBairro(query, bairro);
-        
+        QueryFilters.adicionarFiltroBairroWith(query, bairro);
         return executar.queryExecutor(query);
     }
     
@@ -75,7 +54,7 @@ public class DAOPortal {
              .groupBy("aux.ponto_chegada", "aux.endereco", "aux.tipo", "aux.codigo_linha", "aux.geojson")
              .orderBy("aux.ponto_chegada");
         
-        adicionarFiltroBairro(query, bairro);
+        QueryFilters.adicionarFiltroBairroWith(query, bairro);
         
         return executar.queryExecutor(query);
     }
@@ -141,8 +120,7 @@ public class DAOPortal {
              .groupBy("aux.numero_ponto", "aux.endereco", "aux.tipo", "aux.nome", "aux.geojson")
              .orderBy("aux.numero_ponto", "aux.nome");
         
-        adicionarFiltroBairro(query, bairro);
-        
+        QueryFilters.adicionarFiltroBairroWith(query, bairro);
         return executar.queryExecutor(query);
     }
     

@@ -13,6 +13,7 @@ import com.tcc2.beans.PontosProximos;
 
 import br.com.starmetal.database.postgresql.QueryMaker;
 import br.com.starmetal.exceptions.DatabaseException;
+import br.com.starmetal.util.FiltersUtil;
 
 public class DAOPontos {
 
@@ -80,13 +81,14 @@ public class DAOPontos {
      * 
      * @return [org.json.JSONArray] contendo uma lista de pontos de ônibus
      */
-    public JSONArray consultarPontosDeOnibus() {
+    public JSONArray consultarPontosDeOnibus(String bairro) {
     	QueryMaker query = new QueryMaker();
         query.select("P.numero_ponto", "P.tipo", "P.endereco", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson", "P.codigo_linha", "L.nome_linha", "L.categoria", "L.cor", "L.apenas_cartao")
-        	 .from("pontos_de_onibus P, linhas_de_onibus L")
-        	 .where("P.codigo_linha = L.codigo_linha")
+        	 .from("pontos_de_onibus P")
+        	 .innerJoin("linhas_de_onibus L", "P.codigo_linha = L.codigo_linha")
         	 .orderBy("P.numero_ponto");
         
+        QueryFilters.adicionarFiltroBairro(query, bairro, "P.numero_ponto");
         return executar.queryExecutor(query);
     }
 
@@ -180,12 +182,13 @@ public class DAOPontos {
      * 
      * @return
      */
-    public JSONArray consultarProblemasOnibusCrowdsourcing() {
+    public JSONArray consultarProblemasOnibusCrowdsourcing(String bairro) {
     	QueryMaker query = new QueryMaker();
     	query.select("C.dia", "C.horario", "C.tipo", "C.numero_ponto", "P.tipo", "P.endereco", "ST_AsGeoJSON(P.geom, 15, 0) as geojson")
     		 .from("crowdsourcing_pontos C, divisa_de_bairros B, pontos_de_onibus P")
     		 .where("ST_Within(P.geom, ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
-    		 .where("C.numero_ponto = P.numero_ponto");
+    		 .where("C.numero_ponto = P.numero_ponto")
+    		 .where(FiltersUtil.ilike("B.nome", bairro));
     	
     	return executar.queryExecutor(query);
     }
@@ -194,12 +197,13 @@ public class DAOPontos {
      * 
      * @return
      */
-    public JSONArray consultarProblemasLinhasCrowdsourcing() {
+    public JSONArray consultarProblemasLinhasCrowdsourcing(String bairro) {
     	QueryMaker query = new QueryMaker();
     	query.select("C.dia, C.horario, B.nome, C.tipo, C.codigo_linha, L.nome_linha, L.cor, L.categoria, L.apenas_cartao, ST_AsGeoJSON(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), 15, 0) as geojson")
     		 .from("crowdsourcing_linhas C, linhas_de_onibus L, divisa_de_bairros B")
     		 .where("ST_Within(ST_SetSRID(ST_MakePoint(C.lon, C.lat),4326), ST_Transform(ST_setSRID(B.geom, 29192), 4326))")
-    		 .where("L.codigo_linha = C.codigo_linha");
+    		 .where("L.codigo_linha = C.codigo_linha")
+    		 .where(FiltersUtil.ilike("B.nome", bairro));
     	
     	return executar.queryExecutor(query);
     }
