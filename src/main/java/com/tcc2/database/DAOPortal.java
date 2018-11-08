@@ -93,25 +93,10 @@ public class DAOPortal {
     
     public JSONArray consultarRelatorioPontosOrigem(){
         QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "P.endereco", "P.tipo", "R.codigo_linha")
+        queryWith.select("R.data_viagem", "R.horario_chegada", "R.ponto_chegada", "P.endereco", "P.tipo", "R.codigo_linha")
                  .from("relatorio_viagem R, pontos_de_onibus P")
-                 .where("R.ponto_saida = P.numero_ponto");
-        
-        QueryMaker query = new QueryMaker();
-        query.with(queryWith, "tabela_aux")
-             .select("ponto_saida", "COUNT(ponto_saida) as quantidade", "endereco", "tipo", "codigo_linha")
-             .from("tabela_aux")
-             .groupBy("ponto_saida", "endereco", "tipo", "codigo_linha")
-             .orderBy("ponto_saida");
-        
-        return executar.queryExecutor(query);
-    }
-    
-    public JSONArray consultarRelatorioPontosDestino(){
-        QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_chegada", "P.endereco", "P.tipo", "R.codigo_linha")
-                 .from("relatorio_viagem R, pontos_de_onibus P")
-                 .where("R.ponto_chegada = P.numero_ponto");
+                 .where("R.ponto_chegada = P.numero_ponto")
+                 .where("P.codigo_linha = R.codigo_linha");
         
         QueryMaker query = new QueryMaker();
         query.with(queryWith, "tabela_aux")
@@ -120,6 +105,23 @@ public class DAOPortal {
              .groupBy("ponto_chegada", "endereco", "tipo", "codigo_linha")
              .orderBy("ponto_chegada");
         
+        return executar.queryExecutor(query);
+    }
+    
+    public JSONArray consultarRelatorioPontosDestino(){
+        QueryMaker queryWith = new QueryMaker();
+        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "P.endereco", "P.tipo", "R.codigo_linha")
+                 .from("relatorio_viagem R, pontos_de_onibus P")
+                 .where("R.ponto_saida = P.numero_ponto")
+                 .where("P.codigo_linha = R.codigo_linha");
+        
+        QueryMaker query = new QueryMaker();
+        query.with(queryWith, "tabela_aux")
+             .select("ponto_saida", "COUNT(ponto_saida) as quantidade", "endereco", "tipo", "codigo_linha")
+             .from("tabela_aux")
+             .groupBy("ponto_saida", "endereco", "tipo", "codigo_linha")
+             .orderBy("ponto_saida");
+        
         return executar.queryExecutor(query);        
     }
     
@@ -127,7 +129,7 @@ public class DAOPortal {
         QueryMaker queryWith = new QueryMaker();
         queryWith.select("DISTINCT C.numero_ponto", "P.endereco", "P.tipo", "R.nome", "C.dia", "C.horario", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
                  .from("crowdsourcing_pontos C, pontos_de_onibus P, crowdsourcing_regras R")
-                 .where("C.tipo = R.id")
+                 .where("P.tipo = R.id")
                  .where("P.numero_ponto = C.numero_ponto");
                  
         QueryMaker query = new QueryMaker();
