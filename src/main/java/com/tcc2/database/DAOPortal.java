@@ -21,41 +21,54 @@ public class DAOPortal {
     }
     
     public JSONArray consultarMapaOrigem(LocalDate diaInicio, LocalDate diaFim, LocalTime horaInicio, LocalTime horaFim, String bairro){
-        QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "R.codigo_linha", "P.numero_ponto", "P.endereco", "P.tipo", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
-                 .from("relatorio_viagem R, pontos_de_onibus P")
+        QueryMaker queryPontos = new QueryMaker();
+        queryPontos.select("DISTINCT P.numero_ponto", "P.endereco", "P.tipo", "P.geom")
+        		   .from("relatorio_viagem R, pontos_de_onibus P")
+        		   .where("R.ponto_saida = P.numero_ponto")
+        		   .where("R.codigo_linha = P.codigo_linha");
+    	
+    	QueryMaker queryWith = new QueryMaker();
+        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
+                 .from("relatorio_viagem R, tabela_ponto P")
                  .where("R.ponto_saida = P.numero_ponto");
         
         QueryMaker query = new QueryMaker();
-        query.with(queryWith, "tabela_aux")
-             .select("ponto_saida", "COUNT(ponto_saida)", "aux.endereco", "aux.tipo", "aux.codigo_linha", "geojson")
+        query.with(queryPontos, "tabela_ponto")
+        	 .with(queryWith, "tabela_aux")
+             .select("aux.ponto_saida", "COUNT(aux.ponto_saida) as quantidade", "aux.endereco", "aux.tipo", "aux.geojson")
              .from("tabela_aux aux")
              .where(FiltersUtil.dateBetween("aux.data_viagem", diaInicio, diaFim))
              .where(FiltersUtil.timeBetween("aux.horario_saida", horaInicio, horaFim))             
-             .groupBy("ponto_saida", "aux.endereco", "aux.tipo", "aux.codigo_linha", "geojson")
-             .orderBy("ponto_saida");
+             .groupBy("aux.ponto_saida", "aux.endereco", "aux.tipo", "aux.geojson")
+             .orderBy("aux.ponto_saida");
         
         QueryFilters.adicionarFiltroBairroWith(query, bairro);
         return executar.queryExecutor(query);
     }
     
     public JSONArray consultarMapaDestino(LocalDate diaInicio, LocalDate diaFim, LocalTime horaInicio, LocalTime horaFim, String bairro){
-        QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_chegada", "R.ponto_chegada", "P.numero_ponto", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
-                 .from("relatorio_viagem R, pontos_de_onibus P")
+        QueryMaker queryPontos = new QueryMaker();
+        queryPontos.select("DISTINCT P.numero_ponto", "P.endereco", "P.tipo", "P.geom")
+        		   .from("relatorio_viagem R, pontos_de_onibus P")
+        		   .where("R.ponto_chegada = P.numero_ponto")
+        		   .where("R.codigo_linha = P.codigo_linha");
+    	
+    	QueryMaker queryWith = new QueryMaker();
+        queryWith.select("R.data_viagem", "R.horario_chegada", "R.ponto_chegada", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
+                 .from("relatorio_viagem R, tabela_ponto P")
                  .where("R.ponto_chegada = P.numero_ponto");
                  
         QueryMaker query = new QueryMaker();
-        query.with(queryWith, "tabela_aux")
-             .select("aux.ponto_chegada", "COUNT(aux.ponto_chegada)", "aux.endereco", "aux.tipo", "aux.codigo_linha", "aux.geojson")
+        query.with(queryPontos, "tabela_ponto")
+        	 .with(queryWith, "tabela_aux")
+             .select("aux.ponto_chegada", "COUNT(aux.ponto_chegada) as quantidade", "aux.endereco", "aux.tipo", "aux.geojson")
              .from("tabela_aux aux")
              .where(FiltersUtil.dateBetween("aux.data_viagem", diaInicio, diaFim))
              .where(FiltersUtil.timeBetween("aux.horario_saida", horaInicio, horaFim))
-             .groupBy("aux.ponto_chegada", "aux.endereco", "aux.tipo", "aux.codigo_linha", "aux.geojson")
+             .groupBy("aux.ponto_chegada", "aux.endereco", "aux.tipo", "aux.geojson")
              .orderBy("aux.ponto_chegada");
         
         QueryFilters.adicionarFiltroBairroWith(query, bairro);
-        
         return executar.queryExecutor(query);
     }
     

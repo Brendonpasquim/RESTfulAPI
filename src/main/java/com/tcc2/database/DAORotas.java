@@ -1,10 +1,14 @@
 package com.tcc2.database;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import br.com.starmetal.database.postgresql.QueryMaker;
+import br.com.starmetal.validacoes.Validacao;
 
 public class DAORotas {
 
@@ -109,8 +113,66 @@ public class DAORotas {
 		return rota;
 	}
 	
-	public JSONArray consultarRotaConectada() {
-		return new JSONArray();
+	public JSONArray consultarRotaConectada(int numeroPontoOrigem, int numeroPontoDestino) {
+		
+		JSONArray rotaConectada = new JSONArray();
+		JSONArray terminaisOrigem = procurarTerminalOrigem(numeroPontoOrigem);
+		JSONArray terminaisDestino = procurarTerminalDestino(numeroPontoDestino);
+		
+		if(terminaisOrigem.length() == 0 || terminaisDestino.length() == 0) {
+			return new JSONArray();
+		}
+		
+		HashMap<String, JSONObject> mapTerminaisOrigem = JSONArrayTerminaisToHashMap(terminaisOrigem);
+		HashMap<String, JSONObject> mapTerminaisDestino = JSONArrayTerminaisToHashMap(terminaisDestino);
+		
+		for(Map.Entry<String, JSONObject> terminal : mapTerminaisOrigem.entrySet()) {
+			if(mapTerminaisDestino.containsKey(terminal.getKey())) {
+				int numeroPontoTerminal = terminal.getValue().getInt("numero_ponto");
+				
+				rotaConectada.put(consultarRotaSimplesEntreDoisPontos(numeroPontoOrigem, numeroPontoTerminal));
+				rotaConectada.put(consultarRotaSimplesEntreDoisPontos(numeroPontoTerminal, numeroPontoDestino));
+			}
+		}
+		
+		return rotaConectada;
+	}
+	
+	private HashMap<String, JSONObject> JSONArrayTerminaisToHashMap(JSONArray jsonArrayTerminais) {
+		if(jsonArrayTerminais == null || jsonArrayTerminais.length() == 0) {
+			return null;
+		}
+		
+		String key;
+		JSONObject value;
+		HashMap<String, JSONObject> terminais = new HashMap<>();
+		for(int indice = 0; indice < jsonArrayTerminais.length(); indice++) {
+			value = jsonArrayTerminais.getJSONObject(indice);
+			key = formatarNomeTerminal(value.getString("endereco"));
+			
+			if(key == null) {
+				continue;
+			}
+			
+			terminais.put(key, value);
+		}
+		
+		return terminais;
+	}
+	
+	private String formatarNomeTerminal(String nomeTerminalNaoFormatado) {
+		if(Validacao.ehStringVazia(nomeTerminalNaoFormatado)) {
+			return null;
+		}
+		
+		String nomeFormatado = null;
+		String[] nomesSeparados = nomeTerminalNaoFormatado.split(" - ");
+		if(nomesSeparados.length > 0) {
+			nomeFormatado = nomesSeparados[0];
+			nomeFormatado.replaceAll("  ", " ");
+		}
+		
+		return nomeFormatado;
 	}
 	
 	/**

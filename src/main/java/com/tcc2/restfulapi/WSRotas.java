@@ -49,9 +49,10 @@ public class WSRotas {
 	@GET
 	@Path("rota_conectada")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarRotaConectada() {
+	public String consultarRotaConectada(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
+										 @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
 		
-		JSONArray rotaConectada = manager.getDAORotas().consultarRotaConectada();
+		JSONArray rotaConectada = manager.getDAORotas().consultarRotaConectada(numeroPontoOrigem, numeroPontoDestino);
 		return rotaConectada.toString();
 	}
 	
