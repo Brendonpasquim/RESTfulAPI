@@ -12,21 +12,21 @@ public class QueryFilters {
 	 * @param bairro
 	 * @return
 	 */
-    public static QueryMaker adicionarFiltroBairroWith(QueryMaker query, String bairro) {
-    	if(Validacao.saoParametrosInvalidos(query, bairro)) {
+    public static QueryMaker adicionarFiltroBairroWith(QueryMaker query, String from, String bairro) {
+    	if(Validacao.saoParametrosInvalidos(query, from, bairro)) {
     		return query;
     	}
     	
-    	String where = "ST_Within(P.geom, ST_Transform(ST_setSRID((SELECT geom FROM divisa_de_bairros WHERE nome ilike '%:bairro%'), 29192), 4326))";
+    	String where = "ST_Within(P.geom, ST_Transform(ST_setSRID((SELECT geom FROM divisa_de_bairros WHERE nome ilike '%:bairro%' limit 1), 29192), 4326))";
     	
     	QueryMaker tabelaAuxBairro = new QueryMaker();
     	tabelaAuxBairro.select("DISTINCT *")
     				   .from("pontos_de_onibus P")
     				   .where(where).setParameter("bairro", bairro);
     	
-    	query.with(tabelaAuxBairro, "tabela_pontos")
-    		 .from("tabela_aux aux, tabela_pontos pontos")
-    		 .where("aux.numero_ponto = pontos.numero_ponto");
+    	query.with(tabelaAuxBairro, "filtro_bairro")
+    		 .from(from + ", filtro_bairro bairro")
+    		 .where("aux.numero_ponto = bairro.numero_ponto");
   	
     	return query;
     }

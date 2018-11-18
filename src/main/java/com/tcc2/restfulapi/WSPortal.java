@@ -26,11 +26,11 @@ public class WSPortal {
 	@GET
 	@Path("mapa_origem")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response consultarMapaOrigem(@QueryParam("dia_inicio") LocalDate diaInicio,
-									    @QueryParam("dia_fim") 	  LocalDate diaFim,
+	public Response consultarMapaOrigem(@QueryParam("dia_inicio")  LocalDate diaInicio,
+									    @QueryParam("dia_fim") 	   LocalDate diaFim,
 									    @QueryParam("hora_inicio") LocalTime horaInicio,
-									    @QueryParam("hora_fim") 	  LocalTime horaFim,
-									    @QueryParam("bairro")	  String bairro) {
+									    @QueryParam("hora_fim")    LocalTime horaFim,
+									    @QueryParam("bairro")	   String bairro) {
 		
 		JSONArray mapaOrigem = manager.getDAOPortal().consultarMapaOrigem(diaInicio, diaFim, horaInicio, horaFim, bairro);
 		return getStatusGET(mapaOrigem);
@@ -39,11 +39,11 @@ public class WSPortal {
 	@GET
 	@Path("mapa_destino")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response consultarMapaDestino(@QueryParam("dia_inicio") LocalDate diaInicio,
-									     @QueryParam("dia_fim") 	   LocalDate diaFim,
+	public Response consultarMapaDestino(@QueryParam("dia_inicio")  LocalDate diaInicio,
+									     @QueryParam("dia_fim") 	LocalDate diaFim,
 									     @QueryParam("hora_inicio") LocalTime horaInicio,
 									     @QueryParam("hora_fim")    LocalTime horaFim,
-									     @QueryParam("bairro")	   String bairro) {
+									     @QueryParam("bairro")	    String bairro) {
 		
 		JSONArray mapaOrigem = manager.getDAOPortal().consultarMapaDestino(diaInicio, diaFim, horaInicio, horaFim, bairro);
 		return getStatusGET(mapaOrigem);
@@ -79,11 +79,11 @@ public class WSPortal {
 	@GET
 	@Path("crowdsourcing_pontos_mapa")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response consultarCrowdsourcingPontosMapa(@QueryParam("dia_inicio") LocalDate diaInicio,
-									   			     @QueryParam("dia_fim") 	   LocalDate diaFim,
+	public Response consultarCrowdsourcingPontosMapa(@QueryParam("dia_inicio") 	LocalDate diaInicio,
+									   			     @QueryParam("dia_fim") 	LocalDate diaFim,
 									   			     @QueryParam("hora_inicio") LocalTime horaInicio,
 									   			     @QueryParam("hora_fim")    LocalTime horaFim,
-									   			     @QueryParam("bairro")	   String bairro) {
+									   			     @QueryParam("bairro")	   	String bairro) {
 		
 		JSONArray mapaOrigem = manager.getDAOPortal().consultarCrowdsourcingPontosMapa(diaInicio, diaFim, horaInicio, horaFim, bairro);
 		return getStatusGET(mapaOrigem);

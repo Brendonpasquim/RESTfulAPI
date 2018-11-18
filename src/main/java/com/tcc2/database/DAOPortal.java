@@ -28,21 +28,22 @@ public class DAOPortal {
         		   .where("R.codigo_linha = P.codigo_linha");
     	
     	QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
+        queryWith.select("R.data_viagem", "R.horario_saida", "R.ponto_saida", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson", "P.numero_ponto")
                  .from("relatorio_viagem R, tabela_ponto P")
                  .where("R.ponto_saida = P.numero_ponto");
         
+        String from = "tabela_aux aux";
         QueryMaker query = new QueryMaker();
         query.with(queryPontos, "tabela_ponto")
         	 .with(queryWith, "tabela_aux")
              .select("aux.ponto_saida", "COUNT(aux.ponto_saida) as quantidade", "aux.endereco", "aux.tipo", "aux.geojson")
-             .from("tabela_aux aux")
+             .from(from)
              .where(FiltersUtil.dateBetween("aux.data_viagem", diaInicio, diaFim))
              .where(FiltersUtil.timeBetween("aux.horario_saida", horaInicio, horaFim))             
              .groupBy("aux.ponto_saida", "aux.endereco", "aux.tipo", "aux.geojson")
              .orderBy("aux.ponto_saida");
         
-        QueryFilters.adicionarFiltroBairroWith(query, bairro);
+        QueryFilters.adicionarFiltroBairroWith(query, from, bairro);
         return executar.queryExecutor(query);
     }
     
@@ -54,21 +55,22 @@ public class DAOPortal {
         		   .where("R.codigo_linha = P.codigo_linha");
     	
     	QueryMaker queryWith = new QueryMaker();
-        queryWith.select("R.data_viagem", "R.horario_chegada", "R.ponto_chegada", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson")
+        queryWith.select("R.data_viagem", "R.horario_chegada", "R.ponto_chegada", "P.endereco", "P.tipo", "R.codigo_linha", "ST_AsGeoJSON(P.geom, 15, 0) AS geojson", "P.numero_ponto")
                  .from("relatorio_viagem R, tabela_ponto P")
                  .where("R.ponto_chegada = P.numero_ponto");
                  
+        String from = "tabela_aux aux";
         QueryMaker query = new QueryMaker();
         query.with(queryPontos, "tabela_ponto")
         	 .with(queryWith, "tabela_aux")
              .select("aux.ponto_chegada", "COUNT(aux.ponto_chegada) as quantidade", "aux.endereco", "aux.tipo", "aux.geojson")
-             .from("tabela_aux aux")
+             .from(from)
              .where(FiltersUtil.dateBetween("aux.data_viagem", diaInicio, diaFim))
-             .where(FiltersUtil.timeBetween("aux.horario_saida", horaInicio, horaFim))
+             .where(FiltersUtil.timeBetween("aux.horario_chegada", horaInicio, horaFim))
              .groupBy("aux.ponto_chegada", "aux.endereco", "aux.tipo", "aux.geojson")
              .orderBy("aux.ponto_chegada");
         
-        QueryFilters.adicionarFiltroBairroWith(query, bairro);
+        QueryFilters.adicionarFiltroBairroWith(query, from, bairro);
         return executar.queryExecutor(query);
     }
     
@@ -124,16 +126,17 @@ public class DAOPortal {
                  .where("C.tipo = R.id")
                  .where("P.numero_ponto = C.numero_ponto");
                  
+        String from = "tabela_aux aux";
         QueryMaker query = new QueryMaker();
         query.with(queryWith, "tabela_aux")
              .select("aux.numero_ponto", "aux.endereco", "aux.tipo", "aux.nome", "COUNT(aux.nome) as quantidade", "aux.geojson")
-             .from("tabela_aux aux")
+             .from(from)
              .where(FiltersUtil.dateBetween("aux.data_viagem", diaInicio, diaFim))
              .where(FiltersUtil.timeBetween("aux.horario_saida", horaInicio, horaFim))
              .groupBy("aux.numero_ponto", "aux.endereco", "aux.tipo", "aux.nome", "aux.geojson")
              .orderBy("aux.numero_ponto", "aux.nome");
         
-        QueryFilters.adicionarFiltroBairroWith(query, bairro);
+        QueryFilters.adicionarFiltroBairroWith(query, from, bairro);
         return executar.queryExecutor(query);
     }
     
