@@ -1,5 +1,7 @@
 package com.tcc2.restfulapi;
 
+import static com.tcc2.restfulapi.Responses.getStatusGET;
+
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -41,93 +43,93 @@ public class WSPontos {
 	@GET
 	@Path("pontos_proximos_simplificado")
 	@Produces(MediaType.APPLICATION_JSON)	
-	public String consultarPontosProximosSimplificado(@NotNull @QueryParam("latitude") double latitude, 
+	public Response consultarPontosProximosSimplificado(@NotNull @QueryParam("latitude") double latitude, 
 													  @NotNull @QueryParam("longitude") double longitude) {
 		
         JSONArray pontosProximosSimplificados = manager.getDAOPontos().consultarPontosDeOnibusProximosSimplificado(latitude, longitude);
-		return pontosProximosSimplificados.toString();
+		return getStatusGET(pontosProximosSimplificados);
 	}	
 	
 	@GET
 	@Path("pontos")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarPontos(@QueryParam("bairro") String bairro) {
+	public Response consultarPontos(@QueryParam("bairro") String bairro) {
 		
 		JSONArray pontos = manager.getDAOPontos().consultarPontosDeOnibus(bairro);
-		return pontos.toString();
+		return getStatusGET(pontos);
 	}
 	
 	@GET
 	@Path("tipos_pontos")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarTiposDePontos() {
+	public Response consultarTiposDePontos() {
 		
 		JSONArray tipos = manager.getDAOPontos().consultarTiposDePonto();
-		return tipos.toString();
+		return getStatusGET(tipos);
 	}
 	
 	@GET
 	@Path("bairros")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarBairros() {
+	public Response consultarBairros() {
 		
 		JSONArray bairros = manager.getDAOPontos().consultarBairros();
-		return bairros.toString();
+		return getStatusGET(bairros);
 	}
 	
 	@GET
 	@Path("linhas")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarLinhas() {
+	public Response consultarLinhas() {
 		
 		JSONArray linhas = manager.getDAOPontos().consultarLinhas();
-		return linhas.toString();
+		return getStatusGET(linhas);
 	}
 	
 	
 	@GET
 	@Path("categorias")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarCategoriasDeLinhas() {
+	public Response consultarCategoriasDeLinhas() {
 		
 		JSONArray categorias = manager.getDAOPontos().consultarCategoriasDeLinhas();
-		return categorias.toString();
+		return getStatusGET(categorias);
 	}
 	
 
 	@GET
 	@Path("itinerarios")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarItinerarios() {
+	public Response consultarItinerarios() {
 		
 		JSONArray itinerarios = manager.getDAOPontos().consultarItinerarios();
-		return itinerarios.toString();
+		return getStatusGET(itinerarios);
 	}
 	
 	@GET
 	@Path("horarios")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarHorarios() {
+	public Response consultarHorarios() {
 		
 		JSONArray horarios = manager.getDAOPontos().consultarHorarios();
-		return horarios.toString();
+		return getStatusGET(horarios);
 	}
 
 	@GET
 	@Path("problemas_onibus")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarProblemasOnibus(@QueryParam("bairro") String bairro) {
+	public Response consultarProblemasOnibus(@QueryParam("bairro") String bairro) {
 		
 		JSONArray problemasOnibus = manager.getDAOPontos().consultarProblemasOnibusCrowdsourcing(bairro);
-		return problemasOnibus.toString();
+		return getStatusGET(problemasOnibus);
 	}
 	
 	@GET
 	@Path("problemas_linhas")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarProblemasLinhas(@QueryParam("bairro") String bairro) {
+	public Response consultarProblemasLinhas(@QueryParam("bairro") String bairro) {
 
 		JSONArray problemasLinhas = manager.getDAOPontos().consultarProblemasLinhasCrowdsourcing(bairro);
-		return problemasLinhas.toString();
+		return getStatusGET(problemasLinhas);
 	}
 }

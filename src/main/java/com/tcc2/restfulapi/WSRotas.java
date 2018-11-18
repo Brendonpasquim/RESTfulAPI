@@ -1,5 +1,7 @@
 package com.tcc2.restfulapi;
 
+import static com.tcc2.restfulapi.Responses.getStatusGET;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -7,6 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
 
@@ -27,51 +30,51 @@ public class WSRotas {
 	@GET
 	@Path("rota_simples")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarRotaSimples(@NotNull @QueryParam("latitude_origem")   double latitudeOrigem,
-									   @NotNull @QueryParam("longitude_origem")  double longitudeOrigen,
-									   @NotNull @QueryParam("latitude_destino")  double latitudeDestino,
-									   @NotNull @QueryParam("longitude_destino") double longitudeDestino) {
+	public Response consultarRotaSimples(@NotNull @QueryParam("latitude_origem")   double latitudeOrigem,
+									     @NotNull @QueryParam("longitude_origem")  double longitudeOrigen,
+									     @NotNull @QueryParam("latitude_destino")  double latitudeDestino,
+									     @NotNull @QueryParam("longitude_destino") double longitudeDestino) {
 		
 		JSONArray rotaSimples = manager.getDAORotas().consultarRotaSimplesEntrePontosProximos(latitudeOrigem, longitudeOrigen, latitudeDestino, longitudeDestino);
-		return rotaSimples.toString();
+		return getStatusGET(rotaSimples);
 	}
 	
 	@GET
 	@Path("rota_simples_dois_pontos")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarRotaSimplesEntreDoisPontos(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
-													  @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
+	public Response consultarRotaSimplesEntreDoisPontos(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
+													    @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
 		
 		JSONArray rotaSimplesEntreDoisPontos = manager.getDAORotas().consultarRotaSimplesEntreDoisPontos(numeroPontoOrigem, numeroPontoDestino);
-		return rotaSimplesEntreDoisPontos.toString();
+		return getStatusGET(rotaSimplesEntreDoisPontos);
 	}
 
 	@GET
 	@Path("rota_conectada")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarRotaConectada(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
-										 @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
+	public Response consultarRotaConectada(@NotNull @QueryParam("numero_ponto_origem")  int numeroPontoOrigem,
+										   @NotNull @QueryParam("numero_ponto_destino") int numeroPontoDestino) {
 		
 		JSONArray rotaConectada = manager.getDAORotas().consultarRotaConectada(numeroPontoOrigem, numeroPontoDestino);
-		return rotaConectada.toString();
+		return getStatusGET(rotaConectada);
 	}
 	
 	@GET
 	@Path("origem")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarOrigemViagem() {
+	public Response consultarOrigemViagem() {
 		
 		JSONArray origemViagem = manager.getDAORotas().consultarOrigem();
-		return origemViagem.toString();
+		return getStatusGET(origemViagem);
 	}
 	
 	@GET
 	@Path("destino")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String consultarDestinoViagem() {
+	public Response consultarDestinoViagem() {
 		
 		JSONArray destinoViagem = manager.getDAORotas().consultarDestino();
-		return destinoViagem.toString();
+		return getStatusGET(destinoViagem);
 	}
 	
 }

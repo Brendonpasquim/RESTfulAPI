@@ -1,5 +1,7 @@
 package com.tcc2.restfulapi;
 
+import static com.tcc2.restfulapi.Responses.getStatusPOST;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -12,7 +14,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import com.tcc2.database.DAOManager;
 
@@ -36,7 +37,7 @@ public class WSCrowdsourcing {
 											 @NotNull @FormParam("codigo_linha") 	String codigoLinha) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarRelatorioViagem(dataViagem, horarioSaida, pontoSaida, horarioChegada, pontoChegada, codigoLinha);
-		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();
+		return getStatusPOST(response);
 	}
 
 	@POST
@@ -49,7 +50,7 @@ public class WSCrowdsourcing {
 												 @NotNull @FormParam("horario") 	 LocalTime horario) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingPontos(numeroPonto, dia, horario, tipo);
-		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();  
+		return getStatusPOST(response);
 	}
 	
 	@POST
@@ -64,7 +65,7 @@ public class WSCrowdsourcing {
 												 @NotNull @FormParam("lon") 		 double longitude) {
 		
 		ResultType response = manager.getDAOCrowdsourcing().cadastrarCrowdsourcingLinhas(codigoLinha, dia, horario, latitude, longitude, tipo);
-		return response.equals(ResultType.SUCESS) ? Response.status(Status.CREATED).build() : Response.status(Status.BAD_REQUEST).build();
+		return getStatusPOST(response); 
 	}
 	
 }
