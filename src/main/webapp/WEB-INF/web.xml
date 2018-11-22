@@ -34,4 +34,14 @@
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 	<display-name>restfulapi</display-name>
+	
+	<security-constraint>
+         <web-resource-collection>
+	         <web-resource-name>MyUrb</web-resource-name>
+	         <url-pattern>/*</url-pattern>
+         </web-resource-collection>
+         <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+         </user-data-constraint>
+ 	</security-constraint>
 </web-app>
